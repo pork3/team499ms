@@ -24,7 +24,7 @@ import javax.swing.Timer;
 public class contents extends JPanel implements ActionListener, MouseListener{
 
 	
-	private Image dude;
+	
 	private Timer t;
 	/**
 	 * 
@@ -50,17 +50,18 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 	private static FontMetrics bodyMetric;
 	
 	
+	private static final Color backgroundColor = new Color(255, 255, 242);
 	
-	
+	private Image leftArrow;
 	public Calendar cal;
 	public contents(){
 		super.setDoubleBuffered(true);
 		this.setPreferredSize(calGUI.windowSize);
 		this.setMaximumSize(calGUI.windowSize);
-		
+		this.addMouseListener(this);
 		this.setMinimumSize(calGUI.windowSize);
-		ImageIcon ii = new ImageIcon(this.getClass().getResource("download.png"));
-		dude = ii.getImage();
+		ImageIcon ii = new ImageIcon(this.getClass().getResource("left.png"));
+		leftArrow = ii.getImage();
 		cal = Calendar.getInstance();
 		t = new Timer(15, this);
 		t.start();
@@ -77,12 +78,18 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 	private int startDay = 0;
 	private int endDay = 0;
 	private int currentDay = 0;
+	private int currentMonth = 0;
+	private int currentYear = 0;
+	
 	public void calculateDatesOfMonth(int month, int year) {
+		currentMonth = month;
+		currentYear = year;
 		currentDay = cal.get(Calendar.DAY_OF_MONTH);
-		Date tempDate = cal.getTime();
+		
 		cal.set(Calendar.YEAR, year);
 		cal.set(Calendar.MONTH, month);
 		cal.set(Calendar.DAY_OF_MONTH, 1);
+		Date tempDate = cal.getTime();
 		startDay = cal.get(Calendar.DAY_OF_WEEK);
 		numDaysCurrent = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 		cal.set(Calendar.YEAR, year);
@@ -113,7 +120,7 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 		Graphics2D g2d = (Graphics2D) g;
 		titleMetric = (titleMetric != null ? titleMetric : g2d.getFontMetrics(titleFont));
 		bodyMetric = (bodyMetric != null ? bodyMetric : g2d.getFontMetrics(bodyFont));
-		g2d.setColor(Color.WHITE);
+		g2d.setColor(backgroundColor);
 		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 		//g2d.drawImage(dude, x, y, null);
 		
@@ -122,7 +129,9 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 		paintDays(g2d);
 		
 		
+		g2d.drawImage(leftArrow, 35, 19, 75, 59, 0, 0, leftArrow.getWidth(null), leftArrow.getHeight(null), null);
 		
+		g2d.drawImage(leftArrow, this.getWidth() - 75, 19, this.getWidth() - 35, 59, leftArrow.getWidth(null), 0, 0, leftArrow.getHeight(null), null);
 		
 	}
 	private long counter = 0L;
@@ -132,7 +141,9 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 		counter++;
 		if(counter >= 500) {
 			counter = 0L;
-			cal = Calendar.getInstance();
+			if(Calendar.getInstance().get(Calendar.MONTH) == currentMonth  && Calendar.getInstance().get(Calendar.YEAR) == currentYear) {
+				cal = Calendar.getInstance();
+			}
 		}
 		repaint();
 	}
@@ -167,10 +178,7 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 		for(int week = 0; week < 6; ++week) {
 			for(int day = 0; day < 7; ++day) {
 				//First draw the box...
-				if(day + (week * 7) - startDay + 2 == currentDay) {
-					g.setColor(new Color(0.8f, 0.8f, 1.0f));
-					g.fillRect(116*day - 1, 87 * week + 88, 116, 87);
-				}
+				
 				if(week == 0 && day < startDay - 1) {
 					//Previous month
 					g.setColor(Color.gray);
@@ -189,6 +197,12 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 					Point dayPosition = this.centerString((day + (week * 7) - startDay + 2 - numDaysCurrent) + "", new Rectangle(116*day - 1, 87 * week + 88, 20, 22), bodyMetric);
 					g.drawString((day + (week * 7) - startDay + 2 - numDaysCurrent) + "", dayPosition.x, dayPosition.y);
 				}else {
+					g.setColor(Color.white);
+					g.fillRect(116*day - 1, 87 * week + 88, 116, 87);
+					if(Calendar.getInstance().get(Calendar.MONTH) == currentMonth  && Calendar.getInstance().get(Calendar.YEAR) == currentYear && day + (week * 7) - startDay + 2 == Calendar.getInstance().get(Calendar.DAY_OF_MONTH)  ) {
+						g.setColor(new Color(0.8f, 0.8f, 1.0f));
+						g.fillRect(116*day - 1, 87 * week + 88, 116, 87);
+					}
 					g.setColor(Color.black);
 					Point dayPosition = this.centerString((day + (week * 7) - startDay + 2) + "", new Rectangle(116*day - 1, 87 * week + 88, 20, 22), bodyMetric);
 					g.drawString((day + (week * 7) - startDay + 2) + "", dayPosition.x, dayPosition.y);
@@ -204,12 +218,21 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 
 
 
-
-
+	private static final Rectangle leftArrowRect = new Rectangle(35, 19, 40, 40);
+	private static final Rectangle rightArrowRect = new Rectangle(calGUI.windowSize.width - 65, 19, 40, 40);
 
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		
+	public void mouseClicked(MouseEvent e) {
+		if(leftArrowRect.contains(e.getPoint())) {
+			currentYear = (currentMonth == 0 ? -1 : 0) + currentYear;
+			currentMonth = (currentMonth == 0 ? 11 : currentMonth - 1);
+			calculateDatesOfMonth(currentMonth, currentYear);
+		}else if(rightArrowRect.contains(e.getPoint())) {
+			currentYear = (currentMonth == 11 ? 1 : 0) + currentYear;
+			currentMonth = (currentMonth == 11 ? 0 : currentMonth + 1);
+			calculateDatesOfMonth(currentMonth, currentYear);
+			
+		}
 	}
 
 
@@ -242,7 +265,6 @@ public class contents extends JPanel implements ActionListener, MouseListener{
 	@Override
 	public void mousePressed(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
 	}
 
 
