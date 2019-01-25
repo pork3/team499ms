@@ -4,22 +4,24 @@ import java.util.Calendar;
 
 public class CalendarEvent {
 	
-	public String title;
-	public Calendar timeStart;
-	public Calendar timeEnd;
-	public String note;
-	public String location;
+	private String title;
+	private Calendar timeStart;
+	private Calendar timeEnd;
+	private String note;
+	private String location;
 	
-	
-	
-	
+	/*constructor for event with no title*/
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd) {
 		this(title, timeStart, timeEnd, "", "");
 	}
 	
 	
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd, String note, String location) {
-		
+		this.title = title;
+		this.timeStart = timeStart;
+		this.timeEnd = timeEnd;
+		this.note = note;
+		this.location = location;
 	}
 
 
