@@ -9,8 +9,8 @@ public class LoadEvents {
 	private static void threadedLoad(String fileName, FileIOStatus status) {
 		
 		status.currentStatus = Status.Waiting;
-		status.lock.lock();
 		
+		status.lock.lock();
 		try {
 			/*check to see if file is good*/
 			File dataFile = new File( fileName );
@@ -34,16 +34,89 @@ public class LoadEvents {
 		}
 		br.close();
 		String read = sb.toString();	
-		
+
 		/*now that we have it parse the file*/
-		convertFromString(read);
+		status.storedValue = convertFromString(read);
+		status.lock.unlock(); 
 		
 	}
 
 	
 	private static Calendar convertFromString(String contents) {
-		 System.out.println(contents);
-
+		 
+		StringBuilder sb = new StringBuilder();
+		int i;
+		int strlength = contents.length();
+		String version , year , month, day, times, description;
+		
+		for( i= 0; i < strlength; i++) {
+			
+			char s = contents.charAt(i);		
+			switch(s) {
+			/*version*/	
+			case'v':
+				while ((char c = contents.charAt(i) )!= '\n') {
+					if ( c != ',') {
+					sb.append(c);
+					}
+					i++;
+				}
+				version = sb.toString();
+				/*clearing stringbuilder*/
+				sb.setLength(0);
+				break;
+			/*year*/	
+			case 'Y':
+				i+=2;
+				while ((char c = contents.charAt(i) )!= ',') {
+					sb.append(c);
+					i++;
+				}
+				version = sb.toString();
+				sb.setLength(0);
+				break;
+			/*month*/
+			case 'M':
+				i+=2;
+				while ((char c = contents.charAt(i) )!= ',') {
+					sb.append(c);
+					i++;
+				}
+				version = sb.toString();
+				sb.setLength(0);
+				break;
+			/*Day*/
+			case 'D':
+				i+=2;
+				while (( char c = contents.charAt(i))!= ',') {
+					sb.append(c);
+					i++;
+				}
+				version = sb.toString();
+				sb.setLength(0);
+				break;
+			/*Event*/
+			case 'E':
+				i+=2;
+				while((char c = contents.charAt(i)) !='"') {
+					sb.append(c)
+					i++;				
+				}
+				times = sb.toString();
+				sb.setLength(0);
+			case '"':
+				while((char c = contents.charAt(i)) !='\n') {
+					sb.append(c)
+					i++;				
+				}
+				description = sb.toString();
+				sb.setLength(0);
+			}
+			
+		}
+		
+		
+		
 		
 	}
 	
@@ -51,9 +124,16 @@ public class LoadEvents {
 		
 		FileIOStatus event = new FileIOStatus();
 		/*check if file exists*/
-		threadedLoad(fileName, event);
 		
+		Thread ioJob = new Thread(new Runnable) {
 		
-		return null;
+			public void run() {
+				/*check if file exists*/
+				threadedLoad(filename, event);
+				Thread.join();
+				
+			}
+		}
+		return event;
 	}
 }
