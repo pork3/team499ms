@@ -29,12 +29,15 @@ public class GUI extends JFrame{
 	private static final int bodySize = 26;
 	private static final int daysSize = 18;
 	private static final int eventSize = 12;
+	private static final int editSize = 22;
 	private static final String fontFamily = "Courier";
 	
 	public static final Font titleFont = new Font(fontFamily, Font.BOLD, titleSize);
 	public static final Font bodyFont = new Font(fontFamily, Font.BOLD, bodySize);
 	public static final Font daysFont = new Font(fontFamily, Font.BOLD, daysSize);
 	public static final Font eventFont = new Font(fontFamily, Font.PLAIN, eventSize);
+	public static final Font editFont = new Font(fontFamily, Font.BOLD, editSize);
+	public static final Font editItalFont = new Font(fontFamily, Font.BOLD | Font.ITALIC, editSize);
 	public static final Font eventItalFont = new Font(fontFamily, Font.ITALIC, eventSize);
 	
 	public static final int boxThickness = 2;
@@ -46,8 +49,7 @@ public class GUI extends JFrame{
 	public static final String calendarName = "Calendar 499";
 	
 	public Cal main;
-	
-	
+	public GUIFrame frame;
 	public static GUI instance;
 	public GUI(Cal c, UserInput input, View monthView, View dayView, View eventView) {
 		super(calendarName);
@@ -59,7 +61,8 @@ public class GUI extends JFrame{
 		this.eventView = eventView;
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
-		this.add(new GUIFrame(this));
+		frame = new GUIFrame(this);
+		this.add(frame);
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setResizable(false);
@@ -108,10 +111,15 @@ class GUIFrame extends JPanel implements ActionListener{
 		
 		//Month view calls day view which calls eventView
 	}
-	
+	public long frameCount = 0L;
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		frameCount++;
+		
+		if(frameCount > 100000L) {
+			frameCount = 0;
+		}
 		repaint();
 	}
 }
