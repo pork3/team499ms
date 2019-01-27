@@ -2,6 +2,7 @@ package edu.uoregon.cs.calendar499;
 
 import java.io.BufferedReader;
 import java.util.Calendar;
+import org.json.JSONObject;
 
 public class LoadEvents {
 	
@@ -42,82 +43,45 @@ public class LoadEvents {
 	}
 
 	
-	private static Calendar convertFromString(String contents) {
+	private static Calendar convertFromString(String contents) throws Exception {
 		 
 		StringBuilder sb = new StringBuilder();
-		int i;
-		int strlength = contents.length();
-		String version , year , month, day, times, description;
+		String version, start,end,details;
+		int year,month,day;
+		boolean allday;
 		
-		for( i= 0; i < strlength; i++) {
-			
-			char s = contents.charAt(i);		
-			switch(s) {
-			/*version*/	
-			case'v':
-				while ((char c = contents.charAt(i) )!= '\n') {
-					if ( c != ',') {
-					sb.append(c);
-					}
-					i++;
-				}
-				version = sb.toString();
-				/*clearing stringbuilder*/
-				sb.setLength(0);
-				break;
-			/*year*/	
-			case 'Y':
-				i+=2;
-				while ((char c = contents.charAt(i) )!= ',') {
-					sb.append(c);
-					i++;
-				}
-				version = sb.toString();
-				sb.setLength(0);
-				break;
-			/*month*/
-			case 'M':
-				i+=2;
-				while ((char c = contents.charAt(i) )!= ',') {
-					sb.append(c);
-					i++;
-				}
-				version = sb.toString();
-				sb.setLength(0);
-				break;
-			/*Day*/
-			case 'D':
-				i+=2;
-				while (( char c = contents.charAt(i))!= ',') {
-					sb.append(c);
-					i++;
-				}
-				version = sb.toString();
-				sb.setLength(0);
-				break;
-			/*Event*/
-			case 'E':
-				i+=2;
-				while((char c = contents.charAt(i)) !='"') {
-					sb.append(c)
-					i++;				
-				}
-				times = sb.toString();
-				sb.setLength(0);
-			case '"':
-				while((char c = contents.charAt(i)) !='\n') {
-					sb.append(c)
-					i++;				
-				}
-				description = sb.toString();
-				sb.setLength(0);
+		try {				
+			JSONObject obj = new JSONObject(contents);
+			/*check version*/
+			if( obj.has( "version" ) ){
+				version = obj.getString("version");
 			}
-			
+			/*year*/
+			if ( obj.has( "year" )){
+				year = obj.getInt("year");
+			}
+			/*month*/
+			if ( obj.has( "month" )){
+				month = obj.getInt("month");
+			}
+			/*day*/
+			if ( obj.has( "day" )) {
+				day = obj.getInt("day");
+			}
+			/*event*/
+			if (obj.has( "event ")) {
+				JSONObject eventobj = new JSONObject(obj);
+				start = eventobj.getString("start");
+				end = eventobj.getString("end");
+				allday = eventobj.getBoolean("allday");
+				if ( eventobj.has("details")) {
+					details = eventobj.getString("details");
+				}			
+			}
+		} Catch (Exception e){
+			return null;
 		}
-		
-		
-		
-		
+			
 	}
 	
 	public static FileIOStatus loadCalendar(String fileName) {
@@ -130,7 +94,6 @@ public class LoadEvents {
 			public void run() {
 				/*check if file exists*/
 				threadedLoad(filename, event);
-				Thread.join();
 				
 			}
 		}
