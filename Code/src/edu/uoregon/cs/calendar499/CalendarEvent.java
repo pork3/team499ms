@@ -19,7 +19,11 @@ public class CalendarEvent {
 	
 	
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd, String note, String location) {
-		
+		this.title = title;
+		this.timeStart = timeStart;
+		this.timeEnd = timeEnd;
+		this.note = note;
+		this.location = location;
 	}
 
 
