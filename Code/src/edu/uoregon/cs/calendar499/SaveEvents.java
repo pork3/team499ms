@@ -21,16 +21,25 @@ public class SaveEvents {
 			/*create a new file*/
 		}
 		
-			
-		
 		
 	}
 	
 	private static String convertToString(Calendar calendar) {
 		
-		int year = calendar.getYear();
-		int month = calendar.getMonth();
-		int day = calendar.getDayOfMonth();
+		CalendarEvent ce = Cal.years.get(calendar);
+		int year = calendar.getInstance().get(calendar.YEAR);
+		int month = calendar.getInstance().get(calendar.MONTH);
+		int day = calendar.getInstance().get(calendar.DAY_OF_MONTH);
+		
+		int startHour = ce.gettimeStart.getInstance().get(calendar.HOUR_OF_DAY);
+		int startMin = ce.gettimeStart.getInstance().get(calendar.MINUTE);
+		
+		int endHour = ce.gettimeEnd.getInstance().get(calendar.HOUR_OF_DAY);
+		int endMin = ce.gettimeEnd.getInstance().get(calendar.MINUTE);
+		
+		String title = ce.getTitle();
+		String note = ce.getNote();
+		
 		
 		
 	}

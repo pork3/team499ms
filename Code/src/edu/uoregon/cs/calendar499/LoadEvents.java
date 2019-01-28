@@ -17,7 +17,7 @@ public class LoadEvents {
 			File dataFile = new File( fileName );
 			
 		} catch ( FileNotFoundException FNF ) {
-			status.errorCode = 2;
+			status.errorCode = ErrorNumbers.FileNotFound;
 			status.currentStatus = Status.Failed;
 			return;
 		} 		
@@ -38,6 +38,10 @@ public class LoadEvents {
 
 		/*now that we have it parse the file*/
 		status.storedValue = convertFromString(read);
+		if (status.storedValue == null) {
+			status.errorCode = ErrorNumbers.LoadError;
+			status.currentStatus = Status.Failed;
+		}
 		status.lock.unlock(); 
 		
 	}
