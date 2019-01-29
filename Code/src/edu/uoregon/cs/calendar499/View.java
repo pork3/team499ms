@@ -139,8 +139,6 @@ public class View {
 			//First figure out if it needs to be above or below the current day...
 			//Those in the first 3 weeks will be below
 			//Those in the last 3 weeks will be above
-			eventGridX = 0; //OVERRIDE
-			eventGridY = 5; //OVERRIDE
 			
 			Point eventBox = new Point(0,0);
 			Polygon popupPoly = new Polygon(); 
@@ -245,7 +243,6 @@ public class View {
 		Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
 		ArrayList<CalendarEvent> events = GUI.instance.main.days.get(curCal);
 		
-		boolean isCurrentDay = CalMathAbs.IsCurrentDay(eventGridY, eventGridX, eventDate);
 		
 		boolean renderBar = events.size() > 4; 
 		for(int i = 0; i < events.size(); i++) {
@@ -271,16 +268,6 @@ public class View {
 		
 	}
 	public void renderEvent(Graphics2D g, int topLeftX, int topLeftY) {
-		/*
-		 * OVERRIDES!
-		 */
-		String eventTitle = "Sample Text";
-		int selectedField = -1;
-		String eventNotes = "Sampel text 2";
-		String eventLocation = "";
-		int eventIndex = -1;
-		
-		
 		g.setColor(Color.BLACK);
 		
 		
@@ -288,11 +275,11 @@ public class View {
 		
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 55, boxWidth + width - 20, 45);
 		
-		g.drawRect(topLeftX + 10, topLeftY + 10 + 110, boxWidth + width - 20, 45);
+
 		
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 165, boxWidth + width - 20, 45);
 		
-		g.drawRect(topLeftX + 10, topLeftY + 10 + 165 + 55, boxWidth + width - 20, 45);
+		g.drawRect(topLeftX + 150, topLeftY + 10 + 165 + 55, boxWidth + width - 300, 45);
 		
 		g.drawRect(topLeftX + 150, topLeftY + 10 + 275 + 20, boxWidth + width - 300, 45);
 		
@@ -323,12 +310,62 @@ public class View {
 		
 		//Time
 		
+		g.drawRect(topLeftX + 10, topLeftY + 10 + 110, boxWidth + width - 290, 45);
+		
+		g.drawRect(topLeftX + 10 + boxWidth + width - 275, topLeftY + 10 + 110, 255, 45);
+		Point allDay = View.centerString("All Day Event?", new Rectangle(topLeftX + 10 + boxWidth + width - 270, topLeftY + 10 + 110, 200, 45), editMetric);
+		g.drawString("All Day Event?", allDay.x, allDay.y);
+		
+		g.drawRect(topLeftX + 10 + boxWidth + width - 65, topLeftY + 21 + 110, 25, 25);
+		
+		if(eventAllDay) {
+			g.setColor(Color.blue);
+			g.fillRect(topLeftX + 10 + boxWidth + width - 62, topLeftY + 21 + 113, 19, 19);
+			eventTime1 = "00:00";
+			eventTime2 = "23:59";
+			
+			//Change how the next two boxes are rendered...
+			g.setColor(new Color(0.4f,0.4f,0.4f,0.6f));
+			g.setFont(GUI.editItalFont);
+			dispTitle = eventTitleHint;
+			
+		}
+		
+		
+		g.setFont(GUI.editFont);
+
+		String startTSEdit = eventTime1;
+		if(!eventAllDay && selectedField ==2 && (GUI.instance.frame.frameCount % 50) < 25 ) {
+			startTSEdit = (startTSEdit.replaceAll("[\\s\\S]", " ")) + "|";
+			Point startTSPoint = View.centerString(startTSEdit, new Rectangle(topLeftX + 13, topLeftY + 10 + 110 -2, (boxWidth + width - 290)/2, 45), editMetric);
+			g.drawString(startTSEdit, startTSPoint.x, startTSPoint.y);
+			
+		}
+		
+		String endTSEdit = eventTime2;
+		if(!eventAllDay && selectedField ==3 && (GUI.instance.frame.frameCount % 50) < 25 ) {
+			endTSEdit = (endTSEdit.replaceAll("[\\s\\S]", " ")) + "|";
+			Point endTSPoint = View.centerString(endTSEdit, new Rectangle(topLeftX + 13 + (boxWidth + width - 290)/2, topLeftY + 10 + 110 - 2, (boxWidth + width - 290)/2, 45), editMetric);
+			g.drawString(endTSEdit, endTSPoint.x, endTSPoint.y);
+		}
 		
 		
 		
 		
+		Point time1 = View.centerString(eventTime1, new Rectangle(topLeftX + 10, topLeftY + 10 + 110, (boxWidth + width - 290)/2, 45), editMetric);
+		g.drawString(eventTime1, time1.x, time1.y);
+		Point time2 = View.centerString(eventTime2, new Rectangle(topLeftX + 10 + (boxWidth + width - 290)/2, topLeftY + 10 + 110, (boxWidth + width - 290)/2, 45), editMetric);
+		g.drawString(eventTime2, time2.x, time2.y);
+		
+		
+		
+		g.setColor(Color.black);
+		g.drawLine(topLeftX + 10 + (boxWidth + width - 290) / 2, topLeftY + 10 + 110,topLeftX + 10 + (boxWidth + width - 290) / 2 , topLeftY + 10 + 155);
+		
+		g.setFont(GUI.editFont);
 		
 		//Notes
+		
 		String dispNotes = eventNotes;
 		if(eventNotes.length() == 0) {
 			g.setColor(new Color(0.4f,0.4f,0.4f,0.6f));
@@ -347,25 +384,11 @@ public class View {
 		
 		g.drawString(dispNotes, notesPoint.x, notesPoint.y);
 		
+		g.setColor(Color.black);
+		g.setFont(GUI.bodyFont);
+		Point savePoint = View.centerString(eventSaveHint, new Rectangle(topLeftX + 12, topLeftY + 10 + 165 + 34 + 20, boxWidth + width - 24, 45), bodyMetric);
+		g.drawString(eventSaveHint, savePoint.x, savePoint.y);
 		
-		//Location
-		String dispLoca = eventLocation;
-		if(eventLocation.length() == 0) {
-			g.setColor(new Color(0.4f,0.4f,0.4f,0.6f));
-			g.setFont(GUI.editItalFont);
-			dispLoca = eventLocationHint;
-		}
-		
-		
-		String dispLocaEdit = "";
-		if(selectedField == 5 && (GUI.instance.frame.frameCount % 50) < 25) {
-			dispLocaEdit = (dispLoca.replaceAll("[\\s\\S]", " ")) + "|"; 
-		}
-		
-		Point locaPoint = View.centerString(dispLoca, new Rectangle(topLeftX + 12, topLeftY + 10 + 165 + 55, boxWidth + width - 24, 45), editMetric);
-		g.drawString(dispLocaEdit, locaPoint.x-5, locaPoint.y-2);
-		
-		g.drawString(dispLoca, locaPoint.x, locaPoint.y);
 		
 		
 		
@@ -383,16 +406,22 @@ public class View {
 	}
 	
 	public final String eventTitleHint = "Enter Event Name (Max 40 characters).";
-	public final String eventNotesHint = "Notes.";
+	public final String eventNotesHint = "Enter Event Notes (Max 40 characters).";
 	public final String eventLocationHint = "Location.";
 	public final String eventDeleteHint = "Delete Event";
 	public final String eventAbandonHint = "Cancel";
+	public final String eventTime1Hint = "Start Time";
+	public final String eventSaveHint = "Save Event";
+	public final String eventTime2Hint = "End Time";
 	public String eventTitle = "";
 	public String eventNotes = "";
 	public String eventLocation ="";
+	public boolean eventAllDay = false;
+	public String eventTime1 = "10:00";
+	public String eventTime2 = "20:00";
 	
 	public int eventIndex = -1; // -1 if new event, >= 0 if editing an event.
-	public boolean isEventsShown = true;
+	public boolean isEventsShown = false;
 	public boolean isEventShown = false;
 	public int eventGridX = 0;
 	public int eventGridY = 0;
