@@ -48,39 +48,48 @@ public class LoadEvents {
 
 	
 	private static Calendar convertFromString(String contents) throws Exception {
-		 
-		StringBuilder sb = new StringBuilder();
+		
 		String version, start,end,details;
 		int year,month,day;
 		boolean allday;
 		
 		try {				
-			JSONObject obj = new JSONObject(contents);
-			/*check version*/
-			if( obj.has( "version" ) ){
-				version = obj.getString("version");
-			}
-			/*year*/
-			if ( obj.has( "year" )){
-				year = obj.getInt("year");
-			}
-			/*month*/
-			if ( obj.has( "month" )){
-				month = obj.getInt("month");
-			}
-			/*day*/
-			if ( obj.has( "day" )) {
-				day = obj.getInt("day");
-			}
-			/*event*/
-			if (obj.has( "event ")) {
-				JSONObject eventobj = new JSONObject(obj);
-				start = eventobj.getString("start");
-				end = eventobj.getString("end");
-				allday = eventobj.getBoolean("allday");
-				if ( eventobj.has("details")) {
-					details = eventobj.getString("details");
-				}			
+				JSONObject obj = new JSONObject(contents);
+
+				if( obj.has("version")){
+					version = obj.getString("version");
+				}
+				/*get event array from json*/
+				if( obj.has("events")){
+
+					JSONArray eventarray = obj.getJSONArray("events");
+					int len = eventarray.length();
+
+					/*take the event array as a JSON object and parse*/
+					for( int i=0; i < len; i++){
+						JSONObject deets = eventarray.getJSONObject(i);
+
+						if(deets.has("year")){
+							year = deets.getInt("year");
+						}
+						if(deets.has("month")){
+							year = deets.getInt("month");
+						}
+						if(deets.has("day")){
+							day = deets.getInt("day");
+						}
+						if(deets.has("start")){
+							start = deets.getString("start");
+						}
+						if(deets.has("end")){
+							end = deets.getString("end");
+						}
+						if(deets.has("allday")){
+							allday = deets.getBoolean("allday");
+						}
+					}
+				}
+				
 			}
 		} Catch (Exception e){
 			return null;
