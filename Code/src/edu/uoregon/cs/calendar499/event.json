@@ -1,12 +1,26 @@
 {
-  "version": 1.002,
-  "year": 1990,
-  "month": 2,
-  "day": 5,
-  "event": {
-    "start": "11:50:00",
-    "end": "13:20:00",
-    "details": "Sameple Title",
+  "version": 1.0,
+  
+  "events":
+  [
+  {
+    "year": 2019,
+    "month": 1,
+    "day": 31,
+    "start": "13:00",
+    "end": "14:00",
+    "details": "Meeting",
+    "allday": false
+  
+  },
+  {
+    "year": 2019,
+    "month": 2,
+    "day": 5,
+    "start": "23:00",
+    "end": "23:59",
+    "details": "Finished Project",
     "allday": false
   }
+  ]
 }
