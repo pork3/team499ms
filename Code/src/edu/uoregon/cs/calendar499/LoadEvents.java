@@ -1,7 +1,16 @@
 package edu.uoregon.cs.calendar499;
 
 import java.io.BufferedReader;
+<<<<<<< Updated upstream
+=======
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+>>>>>>> Stashed changes
 import java.util.Calendar;
+import org.json.JSONObject;
+
 import org.json.JSONObject;
 
 public class LoadEvents {
@@ -11,38 +20,57 @@ public class LoadEvents {
 		
 		status.currentStatus = Status.Waiting;
 		
-		status.lock.lock();
-		try {
-			/*check to see if file is good*/
-			File dataFile = new File( fileName );
-			
-		} catch ( FileNotFoundException FNF ) {
-			status.errorCode = ErrorNumbers.FileNotFound;
-			status.currentStatus = Status.Failed;
-			return;
-		} 		
-		/*load the conents into a string to be parsed*/
+		
+		File dataFile = new File( fileName );
 		String loadedContents;
 		
-		FileReader fileRead = new FileReader(fileName);
-		BufferedReader fileBuffer = new BufferedReader(fileRead);
+		try {
+			/*check to see if file is good*/
+			FileReader fileRead = new FileReader(fileName);
+			
 		
-		StringBuilder sb = new StringBuilder();
-		String line;
+			/*load the conents into a string to be parsed*/
 		
-		while((line = fileBuffer.readLine())!= null ) {
-			sb.append(line);
-		}
-		br.close();
-		String read = sb.toString();	
+			
+			BufferedReader fileBuffer = new BufferedReader(fileRead);
+			
+			StringBuilder sb = new StringBuilder();
+			String line;
+			
+			while((line = fileBuffer.readLine())!= null ) {
+				sb.append(line);
+			}
+			String read = sb.toString();	
 
-		/*now that we have it parse the file*/
-		status.storedValue = convertFromString(read);
-		if (status.storedValue == null) {
-			status.errorCode = ErrorNumbers.LoadError;
+			fileBuffer.close();
+			
+			
+			
+			
+			/*now that we have it parse the file*/
+			try{
+				status.storedValue = convertFromString(read);
+				status.lock.lock();
+				if (status.storedValue == null) {
+				
+					status.errorCode = ErrorNumbers.LoadError;
+					status.currentStatus = Status.Failed;
+					
+				}
+			}catch(Exception e){
+				status.errorCode = ErrorNumbers.FileNotFound;
+				status.currentStatus = Status.Failed;
+			}finally{
+				status.lock.unlock(); 
+			}
+		} catch ( IOException FNF ) {
+			status.lock.lock(); 
+			status.errorCode = ErrorNumbers.FileNotFound;
 			status.currentStatus = Status.Failed;
-		}
-		status.lock.unlock(); 
+			status.lock.unlock(); 
+			return;
+		} 		
+		
 		
 	}
 
@@ -82,7 +110,11 @@ public class LoadEvents {
 					details = eventobj.getString("details");
 				}			
 			}
+<<<<<<< Updated upstream
 		} Catch (Exception e){
+=======
+		} catch (Exception e){
+>>>>>>> Stashed changes
 			return null;
 		}
 			
