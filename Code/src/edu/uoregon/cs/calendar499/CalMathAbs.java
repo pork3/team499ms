@@ -37,7 +37,7 @@ public class CalMathAbs {
 		int month = C.get(Calendar.MONTH);
 		int year = C.get(Calendar.YEAR);
 		
-		return month == calMonth && year == calYear;
+		return !(month == calMonth && year == calYear);
 		
 	}
 	

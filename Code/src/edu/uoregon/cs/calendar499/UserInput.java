@@ -22,8 +22,31 @@ public class UserInput implements MouseListener,WindowListener{
 		Point p = gui.view.getGUIBox(arg0.getPoint());
 		
 		System.out.println(p + " " + arg0.getPoint() +" " +  gui.view.getEventBox(arg0.getPoint(), p) + " " + gui.view.getTitleBox(arg0.getPoint()));
-		if(!gui.view.isDisplayingEvents() && !gui.view.isDisplayingEvent()) {
+		if(!gui.view.isDisplayingEvents() && !gui.view.isDisplayingEvent() && p.x != -1) {
 			gui.view.showEvents(p.x, p.y);
+		}else {
+			int clicked = gui.view.getObjectClicked(arg0.getPoint());
+			switch(clicked) {
+			case -1:
+				gui.view.hideEvents();
+				if(p.x != -1) {
+					gui.view.showEvents(p.x,p.y);
+				}
+				break;
+			case -2:
+				gui.view.hideEvents();
+				break;
+			case 1:
+				break;
+			case 2:
+				gui.view.moveToLeft();
+				break;
+			case 3:
+				break;
+			default:
+				System.out.println(clicked);
+				break;
+			}
 		}
 	}
 
