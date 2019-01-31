@@ -47,12 +47,15 @@ public class LoadEvents {
 	}
 
 	
-	private static Calendar convertFromString(String contents) throws Exception {
+	private static Cal convertFromString(String contents) throws Exception {
 		
-		String version, start,end,details;
+		String version, start,end,details,title;
 		int year,month,day;
 		boolean allday;
-		
+		CalendarEvent ce = new CalendarEvent(null,null,null);
+		Cal fileCal = new Cal();
+		Calendar jCalendar = new Calendar();
+
 		try {				
 				JSONObject obj = new JSONObject(contents);
 
@@ -71,25 +74,58 @@ public class LoadEvents {
 
 						if(deets.has("year")){
 							year = deets.getInt("year");
+							jCalendar.set(Calendar.YEAR, year);
 						}
 						if(deets.has("month")){
-							year = deets.getInt("month");
+							month = deets.getInt("month");
+							jCalendar.set(Calendar.MONTH, month);
 						}
 						if(deets.has("day")){
 							day = deets.getInt("day");
+							jCalendar.set(Calendar.DAY_OF_YEAR, day);
 						}
 						if(deets.has("start")){
+							Calendar cstart = jCalendar.clone();
 							start = deets.getString("start");
+							String[] thetime = start.split(":");
+							Integer hour = Integer.parseInt(thetime[0]);
+							Integer min = Integer.parseInt(thetime[1]);
+							cstart.set(Calendar.HOUR_OF_DAY, hour);
+							cstart.set(Calendar.MINUTE, min);
+
+							ce.setTimeStart(cstart);
 						}
 						if(deets.has("end")){
+							Calendar cend = jCalendar.clone();
 							end = deets.getString("end");
+							String[] thetime = start.split(":");
+							Integer hour = Integer.parseInt(thetime[0]);
+							Integer min = Integer.parseInt(thetime[1]);
+							cend.set(Calendar.HOUR_OF_DAY, hour);
+							cend.set(Calendar.MINUTE, min);
+							
+							ce.setTimeEnd(cend);
 						}
+						if(deets.has("details")){
+							details = deets.getString("details");
+							ce.setNote(details);
+						}
+						if(deets.has("title")){
+							title = deets.getString("title");
+							ce.setTitle(title);					
+						}
+
 						if(deets.has("allday")){
 							allday = deets.getBoolean("allday");
 						}
+
+					/*now update the cal object*/
+					Cal.put(jCalendar, ce);	
+
 					}
+
 				}
-				
+
 			}
 		} Catch (Exception e){
 			return null;

@@ -8,7 +8,6 @@ public class CalendarEvent {
 	private Calendar timeStart;
 	private Calendar timeEnd;
 	private String note;
-	private String location;
 	
 	/*constructor for event with no title*/
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd) {
@@ -16,12 +15,11 @@ public class CalendarEvent {
 	}
 	
 	
-	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd, String note, String location) {
+	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd, String note) {
 		this.title = title;
 		this.timeStart = timeStart;
 		this.timeEnd = timeEnd;
 		this.note = note;
-		this.location = location;
 	}
 
 

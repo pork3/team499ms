@@ -7,7 +7,7 @@ public class FileIOStatus {
 	
 	public Status currentStatus = Status.Waiting;
 	public int errorCode = 0;
-	public Calendar storedValue = null;
+	public Cal storedValue = null;
 	public boolean isFromSaving = false;
 	public ReentrantLock lock = new ReentrantLock();
 	

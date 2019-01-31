@@ -9,6 +9,7 @@
     "day": 31,
     "start": "13:00",
     "end": "14:00",
+    "title": "Big One",
     "details": "Meeting",
     "allday": false
   
@@ -19,6 +20,7 @@
     "day": 5,
     "start": "23:00",
     "end": "23:59",
+    "title": "AYYYYYYY",
     "details": "Finished Project",
     "allday": false
   }
