@@ -52,10 +52,7 @@ public class LoadEvents {
 		String version, start,end,details,title;
 		int year,month,day;
 		boolean allday;
-		CalendarEvent ce = new CalendarEvent(null,null,null);
-		Cal fileCal = new Cal();
-		Calendar jCalendar = new Calendar();
-
+		
 		try {				
 				JSONObject obj = new JSONObject(contents);
 
@@ -71,6 +68,10 @@ public class LoadEvents {
 					/*take the event array as a JSON object and parse*/
 					for( int i=0; i < len; i++){
 						JSONObject deets = eventarray.getJSONObject(i);
+
+						CalendarEvent ce = new CalendarEvent(null,null,null);
+						Cal fileCal = new Cal();
+						Calendar jCalendar = new Calendar();
 
 						if(deets.has("year")){
 							year = deets.getInt("year");
