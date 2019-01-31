@@ -100,7 +100,7 @@ public class View {
 				
 				// Draw events here!
 				Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(week, day, c));
-				ArrayList<CalendarEvent> events = GUI.instance.main.days.get(curCal);
+				ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
 				//System.out.println(curCal);
 				if(events != null && !events.isEmpty()) {
 					for(int i = 0; i < events.size(); i++) {
@@ -144,8 +144,8 @@ public class View {
 			Polygon popupPoly = new Polygon(); 
 			Calendar today = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, c));
 			int currentBoxHeight = boxHeight;
-			if(!isDisplayingEvent() && GUI.instance.main.days.get(today).size() <= 3) {
-				currentBoxHeight = boxHeight - 55 * (4 - GUI.instance.main.days.get(today).size());
+			if(!isDisplayingEvent() && GUI.instance.main.globalCalendar.grab(today).size() <= 3) {
+				currentBoxHeight = boxHeight - 55 * (4 - GUI.instance.main.globalCalendar.grab(today).size());
 			}
 			
 			if(eventGridY > 2) {
@@ -241,7 +241,7 @@ public class View {
 		g.drawString(addNew, addPoint.x, addPoint.y);
 		
 		Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
-		ArrayList<CalendarEvent> events = GUI.instance.main.days.get(curCal);
+		ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
 		
 		
 		boolean renderBar = events.size() > 4; 
@@ -405,6 +405,17 @@ public class View {
 		
 	}
 	
+	
+	
+	
+	public int detectEventClickBox(Point mousePos, Point boxPos) {
+		
+		return 0;
+	}
+	
+	
+	
+	
 	public final String eventTitleHint = "Enter Event Name (Max 40 characters).";
 	public final String eventNotesHint = "Enter Event Notes (Max 40 characters).";
 	public final String eventLocationHint = "Location.";
@@ -476,10 +487,36 @@ public class View {
 	
 	public Point getGUIBox(Point mousePos) {
 		if(mousePos.y <= 88) {
-			System.out.println("Top!");
+			return new Point(-1,-1); // Represents out of bounds.
 		}
-		return mousePos;
+		return new Point((int)(mousePos.x - (mousePos.x % width))/width, (int)((mousePos.y - 88) - ((mousePos.y - 88) % height))/height);
 	}
+	
+	public int getEventBox(Point mousePos, Point boxPos) {
+		
+		
+		Point p = new Point(mousePos.x - (boxPos.x * width), mousePos.y - 88 - (boxPos.y * height));
+		
+		if(p.x <= 4 || p.x >= 173 || p.y < 22 ||(p.y - 22) % 24 > 20 || p.y >= 116) {
+			return -1;
+		}
+		
+		
+		return (int)((p.y - 22) - ((p.y - 22) % 24))/24;
+	}
+
+	public int getTitleBox(Point mousePos) {
+		
+		if(mousePos.x >= 360 && mousePos.y >= 12 && mousePos.x <= 400 && mousePos.y <= 50) {
+			return -1;
+		}
+		if(mousePos.x >= 865 && mousePos.y >= 12 && mousePos.x <= 905 && mousePos.y <= 50) {
+			return 1;
+		}
+		return 0;
+		
+	}
+	
 	
 	public static String chopTitle(String title, int length) {
 		if(title.length() > length) {

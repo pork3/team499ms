@@ -9,27 +9,22 @@ import java.awt.event.WindowListener;
 public class UserInput implements MouseListener,WindowListener{
 	GUI gui;
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		Point p = gui.view.getGUIBox(arg0.getPoint());
-		
-		System.out.println(p + " " + arg0.getPoint());
-	}
+	public void mouseClicked(MouseEvent arg0) {}
 
 	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		
-	}
+	public void mouseEntered(MouseEvent arg0) {}
 
 	@Override
-	public void mouseExited(MouseEvent arg0) {
-		
-	}
+	public void mouseExited(MouseEvent arg0) {}
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-Point p = gui.view.getGUIBox(arg0.getPoint());
+		Point p = gui.view.getGUIBox(arg0.getPoint());
 		
-		System.out.println(p + " " + arg0.getPoint());
+		System.out.println(p + " " + arg0.getPoint() +" " +  gui.view.getEventBox(arg0.getPoint(), p) + " " + gui.view.getTitleBox(arg0.getPoint()));
+		if(!gui.view.isDisplayingEvents() && !gui.view.isDisplayingEvent()) {
+			gui.view.showEvents(p.x, p.y);
+		}
 	}
 
 	@Override

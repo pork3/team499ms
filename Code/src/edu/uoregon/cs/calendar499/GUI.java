@@ -46,12 +46,12 @@ public class GUI extends JFrame{
 	
 	public static final String calendarName = "Calendar 499";
 	
-	public Cal main;
+	public Main main;
 	public GUIFrame frame;
 	public static GUI instance;
-	public GUI(Cal c, UserInput input, View View) {
+	public GUI(Main main2, UserInput input, View View) {
 		super(calendarName);
-		main = c;
+		main = main2;
 		instance = this;
 		this.input = input;
 		this.view = View;

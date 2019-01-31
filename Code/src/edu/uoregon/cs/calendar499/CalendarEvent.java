@@ -17,9 +17,10 @@ public class CalendarEvent {
 	
 	
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd, String note, String location) {
+		
 		this.title = title;
-		this.timeStart = timeStart;
-		this.timeEnd = timeEnd;
+		this.timeStart = (Calendar)timeStart.clone();
+		this.timeEnd = (Calendar)timeEnd.clone();
 		this.note = note;
 		this.location = location;
 	}
