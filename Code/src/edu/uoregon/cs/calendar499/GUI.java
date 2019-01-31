@@ -20,9 +20,7 @@ public class GUI extends JFrame{
 	private static final long serialVersionUID = 1L;
 	public static final Dimension windowSize = new Dimension(1254,845);
 	public UserInput input;
-	public View monthView;
-	public View dayView;
-	public View eventView;
+	public View view;
 	
 	
 	private static final int titleSize = 42;
@@ -51,14 +49,12 @@ public class GUI extends JFrame{
 	public Cal main;
 	public GUIFrame frame;
 	public static GUI instance;
-	public GUI(Cal c, UserInput input, View monthView, View dayView, View eventView) {
+	public GUI(Cal c, UserInput input, View View) {
 		super(calendarName);
 		main = c;
 		instance = this;
 		this.input = input;
-		this.monthView = monthView;
-		this.dayView = dayView;
-		this.eventView = eventView;
+		this.view = View;
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
 		frame = new GUIFrame(this);
@@ -107,7 +103,7 @@ class GUIFrame extends JPanel implements ActionListener{
 		
 		g2d.setColor(GUI.backgroundColor);
 		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-		gui.monthView.Display(g2d, gui.main.cal);
+		gui.view.Display(g2d, gui.main.cal);
 		
 		//Month view calls day view which calls eventView
 	}

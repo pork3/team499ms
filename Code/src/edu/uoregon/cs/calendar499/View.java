@@ -474,6 +474,13 @@ public class View {
 	}
 	
 	
+	public Point getGUIBox(Point mousePos) {
+		if(mousePos.y <= 88) {
+			System.out.println("Top!");
+		}
+		return mousePos;
+	}
+	
 	public static String chopTitle(String title, int length) {
 		if(title.length() > length) {
 			return title.substring(0, length - 3) + "...";

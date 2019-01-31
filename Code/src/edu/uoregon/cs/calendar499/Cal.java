@@ -16,7 +16,8 @@ public class Cal {
 		
 		
 		ui = new UserInput();
-		gui = new GUI(this, ui,new View(), new View(), new View());
+		gui = new GUI(this, ui,new View());
+		ui.gui = gui;
 		
 	}
 	 
