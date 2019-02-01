@@ -404,6 +404,7 @@ public class View {
 		}else {
 			eventGridY -= (eventGridX == 0 ? 1 : 0);
 			eventGridX -= (eventGridX == 0 ? -6 : 1);
+			eventDate = CalMathAbs.GetDayCal(eventGridY, eventGridX, GUI.instance.main.cal);
 		}
 	}
 	
@@ -427,6 +428,7 @@ public class View {
 		}else {
 			eventGridY += (eventGridX == 6 ? 1 : 0);
 			eventGridX += (eventGridX == 6 ? -6 : 1);
+			eventDate = CalMathAbs.GetDayCal(eventGridY, eventGridX, GUI.instance.main.cal);
 		}
 	}
 
@@ -491,9 +493,9 @@ public class View {
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 55, boxWidth + width - 20, 45);
 		g.setColor((selectedField == 4 && this.redBox ? new Color(redElement,0,0) : Color.BLACK));
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 165, boxWidth + width - 20, 45);
-		g.setColor(Color.BLACK);
+		g.setColor((selectedField == 8 && this.redBox ? new Color(redElement,0,0) : Color.BLACK));
 		g.drawRect(topLeftX + 150, topLeftY + 10 + 165 + 55, boxWidth + width - 300, 45);
-		
+		g.setColor(Color.BLACK);
 		g.drawRect(topLeftX + 150, topLeftY + 10 + 275 + 20, boxWidth + width - 300, 45);
 		
 		String dispTitle = eventTitle;
@@ -685,10 +687,11 @@ public class View {
 		}else {
 			eventTime2 = formatCalendarTime(e);
 		}
-		 
+		this.eventOrigDate = (Calendar)eventDate.clone();
 		eventNotes = "";
 		eventAllDay = false;
 		eventEvent = new CalendarEvent("",Calendar.getInstance(),Calendar.getInstance());
+		
 	}
 
 	public void showEvent(int eventI) {
@@ -700,6 +703,8 @@ public class View {
 			this.eventIndex = eventI - 6 + scrollBar;
 			Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
 			ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
+			this.eventDate = curCal;
+			this.eventOrigDate = (Calendar)curCal.clone();
 			eventEvent = events.get(this.eventIndex);
 			eventTitle = eventEvent.getTitle();
 			eventNotes = eventEvent.getNote();
@@ -719,12 +724,50 @@ public class View {
 	public boolean attemptSaving() {
 		if(eventTitle != "") {
 			//basically all we need to check for
+			CalendarEvent cc = new CalendarEvent("", Calendar.getInstance(), Calendar.getInstance());
+			Calendar sc = CalMathAbs.GetDayCal(eventGridY, eventGridX, this.eventDate);
+			Calendar ec = CalMathAbs.GetDayCal(eventGridY, eventGridX, this.eventDate);
+			cc.setTitle(this.eventTitle);
+			cc.setNote(this.eventNotes);
+		
+			if(this.eventAllDay) {
+				ec.set(Calendar.SECOND, 59);
+				ec.set(Calendar.MINUTE, 59);
+				ec.set(Calendar.HOUR_OF_DAY, 23);
+				sc.set(Calendar.SECOND, 0);
+				sc.set(Calendar.MINUTE, 0);
+				sc.set(Calendar.HOUR_OF_DAY, 0);
+			}else {
+				ec.set(Calendar.MINUTE, Integer.parseInt(this.eventTime2.substring(3)));
+				ec.set(Calendar.HOUR_OF_DAY, Integer.parseInt(this.eventTime2.substring(0,2)));
+				sc.set(Calendar.MINUTE, Integer.parseInt(this.eventTime1.substring(3)));
+				sc.set(Calendar.HOUR_OF_DAY, Integer.parseInt(this.eventTime1.substring(0,2)));
+			}
+			cc.setTimeStart(sc);
+			cc.setTimeEnd(ec);
+			ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(eventDate);
+			
 			if(eventIndex == -1) {
 				//Create new
-				
+				events.add(cc);
 			}else {
+				System.out.println(eventDate + " " + eventOrigDate);
+				if(eventDate.equals(eventOrigDate)) {
+					CalendarEvent ee = events.get(this.eventIndex);
+					ee.setLocation(cc.getLocation());
+					ee.setNote(ee.getNote());
+					ee.setTitle(cc.getTitle());
+					ee.setTimeEnd(cc.getTimeEnd());
+					ee.setTimeStart(cc.getTimeStart());
+				}else {
+					//Basically we need to modify the original location to have a different thing :D
+					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar.grab(this.eventOrigDate);
+					eventsOrig.remove(this.eventIndex);
+					events.add(cc);
+				}
 				
 			}
+			
 			return true;
 		}
 		//Skip...failed to close...maybe show a boiler plate exception...
@@ -741,6 +784,10 @@ public class View {
 		eventAllDay = false;
 		eventTime1 = "";
 		eventTime2 = "";
+		this.delta = 0;
+		this.overField = -1;
+		this.prevContents = "";
+		this.redBox = false;
 		scrollBar = 0;
 		eventNotes = "";
 		selectedField = -1;
@@ -842,6 +889,7 @@ public class View {
 	public boolean redBox = false;
 	public long delta = 0;
 	public Calendar eventDate = CalMathAbs.ClearTime(Calendar.getInstance());
+	public Calendar eventOrigDate = CalMathAbs.ClearTime(Calendar.getInstance());
 	public CalendarEvent eventEvent = null;
 	public int scrollBar = 0;
 	public int selectedField = -1;	

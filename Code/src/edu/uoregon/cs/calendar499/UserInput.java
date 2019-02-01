@@ -33,7 +33,6 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 			if (!CalMathAbs.IsNotCalMonth(p.y, p.x, GUI.instance.main.cal)) {
 				gui.view.showEvents(p.x, p.y);
 			} else {
-				System.out.println("Out of current month");
 				int dayN = CalMathAbs.GetDayN(p.y, p.x, GUI.instance.main.cal);
 				if (dayN < 15) {
 					GUI.instance.main.cal.set(Calendar.YEAR, GUI.instance.main.cal.get(Calendar.YEAR)
@@ -140,6 +139,15 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				break;
 			case -8:
 				//Save..
+				gui.view.selectedField = 8; 
+				if(gui.view.attemptSaving()) {
+					gui.view.hideEvent();
+					gui.view.selectedField = -1;
+				}else {
+					gui.view.delta = gui.frame.frameCount;
+					gui.view.redBox = true;
+				}
+				
 				break;
 			case -9:
 				gui.view.hideEvent();
@@ -195,7 +203,8 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 
 	@Override
 	public void windowClosing(WindowEvent arg0) {
-		// TODO Auto-generated method stub
+		GUI.instance.dispose();
+		GUI.instance.frame.timer.stop();
 
 	}
 

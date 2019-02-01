@@ -82,7 +82,7 @@ class GUIFrame extends JPanel implements ActionListener{
 	
 	
 	
-	private Timer timer;
+	public Timer timer;
 	public GUI gui;
 	
 	public GUIFrame(GUI gui) {
