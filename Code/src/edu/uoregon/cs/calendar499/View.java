@@ -263,6 +263,35 @@ public class View {
 		return currentBoxHeight;
 	}
 	
+	public void scrollDown() {
+		
+		if(!this.isDisplayingEvent() && this.isDisplayingEvents()) {
+			Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
+			ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
+			System.out.println(events.size());
+			if(events.size() >= 4) {
+				this.scrollBar = (this.scrollBar + 4 >= events.size() ? events.size() - 4 : this.scrollBar + 1);
+				return;
+			}
+		}
+		this.scrollBar = 0;
+	}
+	
+	public void scrollUp() {
+		if(!this.isDisplayingEvent() && this.isDisplayingEvents()) {
+			Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
+			ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
+			System.out.println(events.size());
+			if(events.size() >= 4) {
+				this.scrollBar = (this.scrollBar <= 0 ? 0 : this.scrollBar - 1);
+				return;
+			}
+		}
+		this.scrollBar = 0;
+	}
+	
+	
+	
 	public int getObjectClicked(Point mousePos) {
 		Point topLeft = getPopupBox();
 		int boxHeight = getPopupBoxHeight();
@@ -275,12 +304,70 @@ public class View {
 		if(new Rectangle(10, 10, 32, 32).contains(newPosition)) {
 			return -2;
 		}
-		if(new Rectangle(30,70,520, 45).contains(newPosition)) {
-			return 1;
-		}
 		Calendar today = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, GUI.instance.main.cal));
-		String dateString = today.get(Calendar.DATE) + " " + months[today.get(Calendar.MONTH)] + ", "
-				+ today.get(Calendar.YEAR);
+		String dateString;
+		if(!this.isDisplayingEvent()) {
+			dateString = today.get(Calendar.DATE) + " " + months[today.get(Calendar.MONTH)] + ", "
+					+ today.get(Calendar.YEAR);
+			if(new Rectangle(30,70,520, 45).contains(newPosition)) {
+				return 1;
+			}
+			Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
+			ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
+			int es = events.size();
+			for(int i = 0; i < es; i++) {
+				if(i > 3) {
+					break;
+				}
+				if(new Rectangle(30, 70 +  65 + 55 * i, 520- (es > 4 ? 40 : 0),45).contains(newPosition)) {
+					return 6 + i;
+				}
+			}
+			if(es > 4) {
+				if(new Rectangle(boxWidth + width - upImage.getWidth(null) - 10, 70 + 65, upImage.getWidth(null), upImage.getHeight(null)).contains(newPosition)) {
+					return 4;
+				}
+				if(new Rectangle(boxWidth + width - upImage.getWidth(null) - 10, 70 + 65 + 55*3, upImage.getWidth(null), upImage.getHeight(null)).contains(newPosition)) {
+					return 5;
+				}
+			}
+			
+		}else {
+			// Handles main event things o-0
+			dateString = today.get(Calendar.DATE) + " " + months[today.get(Calendar.MONTH)] + ", "
+					+ today.get(Calendar.YEAR) + " - " + (this.eventIndex == -1 ? "New Event" : "Edit Event");
+			
+			if(new Rectangle(10, 65, 560, 45).contains(newPosition)) {
+				//Title
+				return -3;
+			}
+			if(new Rectangle(10, 120, 140, 40).contains(newPosition)) {
+				if(newPosition.x < 75) {
+					return -14;
+				}
+				return -4;
+			}
+			if(new Rectangle(155, 120, 145, 165-120).contains(newPosition)) {
+				if(newPosition.x < (145 / 2) + 155) {
+					return -15;
+				}
+				return -5;
+			}
+			if(new Rectangle(150, 305, 430 - 145, 445 - 305).contains(newPosition)) {
+				return -9;
+			}
+			
+			if(new Rectangle(525, 130, 25, 25).contains(newPosition)) {
+				return -6;
+			}
+			if(new Rectangle(10, 175, 560, 45).contains(newPosition)) {
+				return -7;
+			}
+			if(new Rectangle(150, 230, 430 - 150, 45).contains(newPosition)) {
+				return -8;
+			}
+		}
+		
 		Point datePoint = View.centerString(dateString,
 				new Rectangle(topLeft.x + boxWidth / 2, topLeft.y + 15, width, 30),
 				editMetric);
@@ -297,14 +384,49 @@ public class View {
 	
 	public void moveToLeft() {
 		
-		if((eventGridY == 0 && eventGridX == 0) || (CalMathAbs.IsNotCalMonth(eventGridY, eventGridX, GUI.instance.main.cal))) {
+		if((eventGridY == 0 && eventGridX == 0) || (CalMathAbs.IsNotCalMonth(eventGridY - (eventGridX == 0 ? 1 : 0), eventGridX - (eventGridX == 0 ? -6 : 1), GUI.instance.main.cal))) {
+			
+			int dayN = CalMathAbs.GetDayN(eventGridY - (eventGridX == 0 ? 1 : 0), eventGridX - (eventGridX == 0 ? -6 : 1), GUI.instance.main.cal);
+			
 			GUI.instance.main.cal.set(Calendar.YEAR, GUI.instance.main.cal.get(Calendar.YEAR) + (GUI.instance.main.cal.get(Calendar.MONTH) == 0 ? -1 : 0));
 			GUI.instance.main.cal.set(Calendar.MONTH, GUI.instance.main.cal.get(Calendar.MONTH) + (GUI.instance.main.cal.get(Calendar.MONTH) == 0 ? 11 : -1));
-			
+			GUI.instance.main.cal.set(Calendar.DATE,dayN);
+			eventDate = (Calendar)GUI.instance.main.cal.clone();
+			for(int week = 0; week < 6; week++) {
+				for(int day = 0; day < 7; day++) {
+					if(!CalMathAbs.IsNotCalMonth(week, day, GUI.instance.main.cal) && CalMathAbs.GetDayN(week, day, GUI.instance.main.cal) == dayN) {
+						eventGridX = day;
+						eventGridY = week;
+					}
+				}
+			}
 			
 		}else {
 			eventGridY -= (eventGridX == 0 ? 1 : 0);
 			eventGridX -= (eventGridX == 0 ? -6 : 1);
+		}
+	}
+	
+	public void moveToRight() {
+		if((eventGridY == 5 && eventGridX == 6) || (CalMathAbs.IsNotCalMonth(eventGridY + (eventGridX == 6 ? 1 : 0), eventGridX + (eventGridX == 6 ? -6 : 1), GUI.instance.main.cal))) {
+			int dayN = CalMathAbs.GetDayN(eventGridY + (eventGridX == 6 ? 1 : 0), eventGridX + (eventGridX == 6 ? -6 : 1), GUI.instance.main.cal);
+			
+			GUI.instance.main.cal.set(Calendar.YEAR, GUI.instance.main.cal.get(Calendar.YEAR) + (GUI.instance.main.cal.get(Calendar.MONTH) == 11 ? 1 : 0));
+			GUI.instance.main.cal.set(Calendar.MONTH, GUI.instance.main.cal.get(Calendar.MONTH) + (GUI.instance.main.cal.get(Calendar.MONTH) == 11 ? -11 : 1));
+			GUI.instance.main.cal.set(Calendar.DATE,dayN);
+			eventDate = (Calendar)GUI.instance.main.cal.clone();
+			for(int week = 0; week < 6; week++) {
+				for(int day = 0; day < 7; day++) {
+					if(!CalMathAbs.IsNotCalMonth(week, day, GUI.instance.main.cal) && CalMathAbs.GetDayN(week, day, GUI.instance.main.cal) == dayN) {
+						eventGridX = day;
+						eventGridY = week;
+					}
+				}
+			}
+			
+		}else {
+			eventGridY += (eventGridX == 6 ? 1 : 0);
+			eventGridX += (eventGridX == 6 ? -6 : 1);
 		}
 	}
 
@@ -415,23 +537,32 @@ public class View {
 
 		g.setFont(GUI.editFont);
 
-		String startTSEdit = eventTime1;
-		if (!eventAllDay && selectedField == 2 && (GUI.instance.frame.frameCount % 50) < 25) {
-			startTSEdit = (startTSEdit.replaceAll("[\\s\\S]", " ")) + "|";
-			Point startTSPoint = View.centerString(startTSEdit,
-					new Rectangle(topLeftX + 13, topLeftY + 10 + 110 - 2, (boxWidth + width - 290) / 2, 45),
-					editMetric);
-			g.drawString(startTSEdit, startTSPoint.x, startTSPoint.y);
-
+		if(selectedField == 2) {
+			if(this.overField == 0) {
+				g.setColor(new Color(0.1f,0.1f,0.1f,0.1f));
+				g.fillRect(topLeftX + 46, topLeftY + 10 + 110+10, 33, 27);
+				g.setColor(Color.BLACK);
+			}
+			if(this.overField == 1) {
+				g.setColor(new Color(0.1f,0.1f,0.1f,0.1f));
+				g.fillRect(topLeftX + 46 + 39, topLeftY + 10 + 110+10, 33, 27);
+				g.setColor(Color.BLACK);
+			}
 		}
-
-		String endTSEdit = eventTime2;
-		if (!eventAllDay && selectedField == 3 && (GUI.instance.frame.frameCount % 50) < 25) {
-			endTSEdit = (endTSEdit.replaceAll("[\\s\\S]", " ")) + "|";
-			Point endTSPoint = View.centerString(endTSEdit, new Rectangle(topLeftX + 13 + (boxWidth + width - 290) / 2,
-					topLeftY + 10 + 110 - 2, (boxWidth + width - 290) / 2, 45), editMetric);
-			g.drawString(endTSEdit, endTSPoint.x, endTSPoint.y);
+		if(selectedField == 3) {
+			if(this.overField == 2) {
+				g.setColor(new Color(0.1f,0.1f,0.1f,0.1f));
+				g.fillRect(topLeftX + 46 + 145, topLeftY + 10 + 110+10, 33, 27);
+				g.setColor(Color.BLACK);
+			}
+			if(this.overField == 3) {
+				g.setColor(new Color(0.1f,0.1f,0.1f,0.1f));
+				g.fillRect(topLeftX + 46 + 39 + 145, topLeftY + 10 + 110+10, 33, 27);
+				g.setColor(Color.BLACK);
+			}
 		}
+		
+		
 
 		Point time1 = View.centerString(eventTime1,
 				new Rectangle(topLeftX + 10, topLeftY + 10 + 110, (boxWidth + width - 290) / 2, 45), editMetric);
@@ -487,30 +618,7 @@ public class View {
 
 	}
 
-	public final String eventTitleHint = "Enter Event Name (Max 40 characters).";
-	public final String eventNotesHint = "Enter Event Notes (Max 40 characters).";
-	public final String eventLocationHint = "Location.";
-	public final String eventDeleteHint = "Delete Event";
-	public final String eventAbandonHint = "Cancel";
-	public final String eventTime1Hint = "Start Time";
-	public final String eventSaveHint = "Save Event";
-	public final String eventTime2Hint = "End Time";
-	public String eventTitle = "";
-	public String eventNotes = "";
-	public String eventLocation = "";
-	public boolean eventAllDay = false;
-	public String eventTime1 = "10:00";
-	public String eventTime2 = "20:00";
 
-	public int eventIndex = -1; // -1 if new event, >= 0 if editing an event.
-	public boolean isEventsShown = false;
-	public boolean isEventShown = false;
-	public int eventGridX = 0;
-	public int eventGridY = 0;
-	public Calendar eventDate = CalMathAbs.ClearTime(Calendar.getInstance());
-	public CalendarEvent eventEvent = null;
-	public int scrollBar = 0;
-	public int selectedField = -1;
 	/*
 	 * Selected field: -1 is nothing is selected, should be set when user clicks on
 	 * window but not on a field 0 is title field is selected. 1 is time field was
@@ -536,13 +644,78 @@ public class View {
 		// Creates a new event
 		eventIndex = -1;
 		eventTitle = "";
-
+		
+		Calendar e = (Calendar)Calendar.getInstance().clone();
+		e.set(Calendar.MINUTE, e.get(Calendar.MINUTE) - (e.get(Calendar.MINUTE) % 15));
+		eventTime1 = formatCalendarTime(e);
+		e.add(Calendar.MINUTE, 15);
+		if(e.get(Calendar.HOUR_OF_DAY) == 0 && e.get(Calendar.MINUTE) < 15) {
+			eventTime2 = "23:59";
+		}else {
+			eventTime2 = formatCalendarTime(e);
+		}
+		 
+		eventNotes = "";
+		eventAllDay = false;
+		eventEvent = new CalendarEvent("",Calendar.getInstance(),Calendar.getInstance());
 	}
 
-	public void showEvent(int eventIndex) {
-
+	public void showEvent(int eventI) {
+		selectedField = -1;
+		if(eventI == -1) {
+			this.createEvent();
+		}else {
+			System.out.println("Shown! " + this.eventIndex);
+			this.eventIndex = eventI - 6 + scrollBar;
+			Calendar curCal = CalMathAbs.ClearTime(CalMathAbs.GetDayCal(eventGridY, eventGridX, eventDate));
+			ArrayList<CalendarEvent> events = GUI.instance.main.globalCalendar.grab(curCal);
+			eventEvent = events.get(this.eventIndex);
+			eventTitle = eventEvent.getTitle();
+			eventNotes = eventEvent.getNote();
+			if(eventEvent.getTimeEnd().get(Calendar.SECOND) != 59) {
+				eventAllDay = false;
+				eventTime1 = formatCalendarTime(eventEvent.getTimeStart());
+				eventTime2 = formatCalendarTime(eventEvent.getTimeEnd());
+			}else {
+				eventAllDay = true;
+				eventTime1 = "";
+				eventTime2 = "";
+			}
+		}
+		isEventShown = true;
 	}
-
+	
+	public boolean attemptSaving() {
+		if(eventTitle != "") {
+			//basically all we need to check for
+			if(eventIndex == -1) {
+				//Create new
+				
+			}else {
+				
+			}
+			return true;
+		}
+		//Skip...failed to close...maybe show a boiler plate exception...
+		return false;
+	}
+	
+	public void hideEvent() {
+		//Always attempt saving first, except when calcenlling
+		isEventShown = false;
+		selectedField = -1;
+		eventTitle = "";
+		eventEvent = null;
+		this.eventIndex = -1;
+		eventAllDay = false;
+		eventTime1 = "";
+		eventTime2 = "";
+		scrollBar = 0;
+		eventNotes = "";
+	}
+	public String formatCalendarTime(Calendar c) {
+		return (c.get(Calendar.HOUR_OF_DAY) < 10 ? "0" : "") + c.get(Calendar.HOUR_OF_DAY) + ":" +(c.get(Calendar.MINUTE) < 10 ? "0" : "") + c.get(Calendar.MINUTE) ;
+	}
 	public void showEvents(int gridX, int gridY) {
 		eventGridX = gridX;
 		eventGridY = gridY;
@@ -610,5 +783,29 @@ public class View {
 		return new Point(rect.x, rect.y + ((rect.height - fm.getHeight()) / 2) + fm.getAscent());
 	}
 
-	
+	public final String eventTitleHint = "Enter Event Name (Max 40 characters).";
+	public final String eventNotesHint = "Enter Event Notes (Max 40 characters).";
+	public final String eventLocationHint = "Location.";
+	public final String eventDeleteHint = "Delete Event";
+	public final String eventAbandonHint = "Cancel";
+	public final String eventTime1Hint = "Start Time";
+	public final String eventSaveHint = "Save Event";
+	public final String eventTime2Hint = "End Time";
+	public String eventTitle = "";
+	public String eventNotes = "";
+	public String eventLocation = "";
+	public boolean eventAllDay = false;
+	public String eventTime1 = "10:00";
+	public String eventTime2 = "20:00";
+	public int overField = -1;
+
+	public int eventIndex = -1; // -1 if new event, >= 0 if editing an event.
+	public boolean isEventsShown = false;
+	public boolean isEventShown = false;
+	public int eventGridX = 0;
+	public int eventGridY = 0;
+	public Calendar eventDate = CalMathAbs.ClearTime(Calendar.getInstance());
+	public CalendarEvent eventEvent = null;
+	public int scrollBar = 0;
+	public int selectedField = -1;	
 }

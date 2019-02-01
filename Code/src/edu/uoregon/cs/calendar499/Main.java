@@ -22,9 +22,10 @@ public class Main {
 		st.set(Calendar.HOUR, 8);
 		et.set(Calendar.HOUR, 9);
 		events.add(new CalendarEvent("E1", st, et));
-		events.add(new CalendarEvent("E1", st, et));
-		events.add(new CalendarEvent("E1", st, et));
-		events.add(new CalendarEvent("E1", st, et));
+		events.add(new CalendarEvent("E2", st, et));
+		events.add(new CalendarEvent("E3", st, et));
+		events.add(new CalendarEvent("E4", st, et));
+		events.add(new CalendarEvent("E5", st, et));
 		
 		ui = new UserInput();
 		gui = new GUI(this, ui,new View());
