@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class UserInput implements MouseListener, WindowListener, KeyListener {
@@ -150,6 +151,11 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				
 				break;
 			case -9:
+				if(gui.view.eventIndex != -1) {
+					//actually have to delete it.
+					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar.grab(gui.view.eventOrigDate);
+					eventsOrig.remove(gui.view.eventIndex);
+				}
 				gui.view.hideEvent();
 				break;
 			case 0:
