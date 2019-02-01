@@ -51,7 +51,7 @@ public class LoadEvents {
 		String version, start,end,details,title;
 		int year,month,day;
 		boolean allday;
-		
+		Cal fileCal = new Cal();
 		try {				
 				JSONObject obj = new JSONObject(contents);
 
@@ -69,7 +69,7 @@ public class LoadEvents {
 						JSONObject deets = eventarray.getJSONObject(i);
 
 						CalendarEvent ce = new CalendarEvent(null,null,null);
-						Cal fileCal = new Cal();
+						
 						Calendar jCalendar = new Calendar();
 
 						if(deets.has("year")){
@@ -120,7 +120,7 @@ public class LoadEvents {
 						}
 
 					/*now update the cal object*/
-					Cal.put(jCalendar, ce);	
+					fileCal.put(jCalendar, ce);	
 
 					}
 
@@ -130,6 +130,7 @@ public class LoadEvents {
 		} Catch (Exception e){
 			return null;
 		}
+		return fileCal;
 			
 	}
 	
