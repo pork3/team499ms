@@ -1,13 +1,15 @@
 package edu.uoregon.cs.calendar499;
 
 import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Calendar;
 
-public class UserInput implements MouseListener, WindowListener {
+public class UserInput implements MouseListener, WindowListener, KeyListener {
 	GUI gui;
 
 	@Override
@@ -130,6 +132,8 @@ public class UserInput implements MouseListener, WindowListener {
 				break;
 			case -6:
 				gui.view.eventAllDay =!gui.view.eventAllDay;
+				gui.view.selectedField = -1;
+				gui.view.overField = -1;
 				break;
 			case -7:
 				gui.view.selectedField = 4;
@@ -217,6 +221,253 @@ public class UserInput implements MouseListener, WindowListener {
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void keyPressed(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		char cc = arg0.getKeyChar();
+		if((int)cc < 32 && (int)cc != 8) {
+			//ignore?
+		}else {
+			switch(gui.view.selectedField) {
+			case -1:
+				break;
+			case 0:
+				if((int)cc == 8) {
+					if(gui.view.eventTitle.length() > 0) {
+						gui.view.eventTitle = gui.view.eventTitle.substring(0, gui.view.eventTitle.length() - 1);
+					}else {
+						gui.view.delta = gui.frame.frameCount;
+						gui.view.redBox = true;
+					}
+				}else {
+					if(gui.view.eventTitle.length() < 40) {
+						gui.view.eventTitle = gui.view.eventTitle + cc;
+					}else {
+						gui.view.delta = gui.frame.frameCount;
+						gui.view.redBox = true;
+					}
+					
+				}
+				break;
+			case 4:
+				if((int)cc == 8) {
+					if(gui.view.eventNotes.length() > 0) {
+						gui.view.eventNotes = gui.view.eventNotes.substring(0, gui.view.eventNotes.length() - 1);
+					}else {
+						gui.view.delta = gui.frame.frameCount;
+						gui.view.redBox = true;
+					}
+				}else {
+					if(gui.view.eventNotes.length() < 40) {
+						gui.view.eventNotes = gui.view.eventNotes + cc;
+					}else {
+						gui.view.delta = gui.frame.frameCount;
+						gui.view.redBox = true;
+					}
+					
+				}
+				break;
+			case 2:
+				if(((int)cc >= 48 && (int)cc <= 58)  || (int)cc == 8) {
+					if(gui.view.overField == 0) {
+						if((int)cc == 8) {
+							if(gui.view.prevContents.length() > 0) {
+								gui.view.prevContents = gui.view.prevContents.substring(1);
+							}else {
+								gui.view.delta = gui.frame.frameCount;
+								gui.view.redBox = true;
+							}
+						}else {
+							if(gui.view.prevContents.length() < 2) {
+								gui.view.prevContents = gui.view.prevContents + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 23) {
+									//Coerse it
+									gui.view.prevContents = "23";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime1 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime1.substring(2);
+									gui.view.prevContents = "";
+									gui.view.overField = 1;
+									return;
+								}
+							}else if(gui.view.prevContents.charAt(0) == '0'){
+								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 23) {
+									//Coerse it
+									gui.view.prevContents = "23";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime1 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime1.substring(2);
+									gui.view.prevContents = "";
+									gui.view.overField = 1;
+									return;
+								}
+							}else {
+								gui.view.prevContents = "";
+								gui.view.overField = 1;
+								return;
+							}
+						}
+						gui.view.eventTime1 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime1.substring(2);
+					}else if(gui.view.overField == 1) {
+						if((int)cc == 8) {
+							if(gui.view.prevContents.length() > 0) {
+								gui.view.prevContents = gui.view.prevContents.substring(1);
+							}else {
+								gui.view.delta = gui.frame.frameCount;
+								gui.view.redBox = true;
+							}
+						}else {
+							if(gui.view.prevContents.length() < 2) {
+								gui.view.prevContents = gui.view.prevContents + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 59) {
+									//Coerse it
+									gui.view.prevContents = "59";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime1 =  gui.view.eventTime1.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+									gui.view.prevContents = "";
+									gui.view.overField = 2;
+									gui.view.selectedField = 3;
+									return;
+								}
+							}else if(gui.view.prevContents.charAt(0) == '0'){
+								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 59) {
+									//Coerse it
+									gui.view.prevContents = "59";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime1 =  gui.view.eventTime1.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+									gui.view.prevContents = "";
+									gui.view.overField = 2;
+									gui.view.selectedField = 3;
+									return;
+								}
+							}else {
+								gui.view.prevContents = "";
+								gui.view.overField = 2;
+								gui.view.selectedField = 3;
+								return;
+							}
+						}
+						gui.view.eventTime1 =  gui.view.eventTime1.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+					}
+					
+					
+				}else {
+					gui.view.delta = gui.frame.frameCount;
+					gui.view.redBox = true;
+				}
+				break;
+			case 3:
+				if(((int)cc >= 48 && (int)cc <= 58)  || (int)cc == 8) {
+					if(gui.view.overField == 2) {
+						if((int)cc == 8) {
+							if(gui.view.prevContents.length() > 0) {
+								gui.view.prevContents = gui.view.prevContents.substring(1);
+							}else {
+								gui.view.delta = gui.frame.frameCount;
+								gui.view.redBox = true;
+							}
+						}else {
+							if(gui.view.prevContents.length() < 2) {
+								gui.view.prevContents = gui.view.prevContents + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 23) {
+									//Coerse it
+									gui.view.prevContents = "23";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime2 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime2.substring(2);
+									gui.view.prevContents = "";
+									gui.view.overField = 3;
+									return;
+								}
+							}else if(gui.view.prevContents.charAt(0) == '0'){
+								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 23) {
+									//Coerse it
+									gui.view.prevContents = "23";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime2 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime2.substring(2);
+									gui.view.prevContents = "";
+									gui.view.overField = 3;
+									return;
+								}
+							}else {
+								gui.view.prevContents = "";
+								gui.view.overField = 3;
+								return;
+							}
+						}
+						gui.view.eventTime2 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime2.substring(2);
+					}else if(gui.view.overField == 3) {
+						if((int)cc == 8) {
+							if(gui.view.prevContents.length() > 0) {
+								gui.view.prevContents = gui.view.prevContents.substring(1);
+							}else {
+								gui.view.delta = gui.frame.frameCount;
+								gui.view.redBox = true;
+							}
+						}else {
+							if(gui.view.prevContents.length() < 2) {
+								gui.view.prevContents = gui.view.prevContents + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 59) {
+									//Coerse it
+									gui.view.prevContents = "59";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime2 =  gui.view.eventTime2.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+									gui.view.prevContents = "";
+									gui.view.overField = -1;
+									gui.view.selectedField = -1;
+									return;
+								}
+							}else if(gui.view.prevContents.charAt(0) == '0'){
+								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
+								if(Integer.parseInt(gui.view.prevContents) > 59) {
+									//Coerse it
+									gui.view.prevContents = "59";
+								}
+								if(gui.view.prevContents.length() == 2) {
+									gui.view.eventTime2 =  gui.view.eventTime2.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+									gui.view.prevContents = "";
+									gui.view.overField = -1;
+									gui.view.selectedField = -1;
+									return;
+								}
+							}else {
+								gui.view.prevContents = "";
+								gui.view.overField = -1;
+								gui.view.selectedField = -1;
+								return;
+							}
+						}
+						gui.view.eventTime2 =  gui.view.eventTime2.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+					}
+					
+					
+				}else {
+					gui.view.delta = gui.frame.frameCount;
+					gui.view.redBox = true;
+				}
+				break;
+			}
+		}
 	}
 
 }

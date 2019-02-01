@@ -64,6 +64,7 @@ public class GUI extends JFrame{
 		this.setResizable(false);
 		this.setVisible(true);
 		this.addWindowListener(input);
+		this.addKeyListener(input);
 		
 		
 	}

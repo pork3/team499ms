@@ -341,13 +341,13 @@ public class View {
 				//Title
 				return -3;
 			}
-			if(new Rectangle(10, 120, 140, 40).contains(newPosition)) {
+			if(new Rectangle(10, 120, 140, 40).contains(newPosition) && !this.eventAllDay) {
 				if(newPosition.x < 75) {
 					return -14;
 				}
 				return -4;
 			}
-			if(new Rectangle(155, 120, 145, 165-120).contains(newPosition)) {
+			if(new Rectangle(155, 120, 145, 165-120).contains(newPosition) && !this.eventAllDay) {
 				if(newPosition.x < (145 / 2) + 155) {
 					return -15;
 				}
@@ -482,15 +482,20 @@ public class View {
 		g.setColor(Color.BLACK);
 
 		g.setFont(GUI.editFont);
-
+		float redElement = 1f - ((GUI.instance.frame.frameCount - this.delta) / 50f);
+		if(redElement < 0 || redElement > 1) {
+			this.redBox = false;
+		}
+		g.setColor((selectedField == 0 && this.redBox ? new Color(redElement,0,0) : Color.BLACK));
+		
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 55, boxWidth + width - 20, 45);
-
+		g.setColor((selectedField == 4 && this.redBox ? new Color(redElement,0,0) : Color.BLACK));
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 165, boxWidth + width - 20, 45);
-
+		g.setColor(Color.BLACK);
 		g.drawRect(topLeftX + 150, topLeftY + 10 + 165 + 55, boxWidth + width - 300, 45);
-
+		
 		g.drawRect(topLeftX + 150, topLeftY + 10 + 275 + 20, boxWidth + width - 300, 45);
-
+		
 		String dispTitle = eventTitle;
 		if (eventTitle.length() == 0) {
 			g.setColor(new Color(0.4f, 0.4f, 0.4f, 0.6f));
@@ -513,9 +518,8 @@ public class View {
 
 		// Time
 
-		g.drawRect(topLeftX + 10, topLeftY + 10 + 110, boxWidth + width - 290, 45);
-
-		g.drawRect(topLeftX + 10 + boxWidth + width - 275, topLeftY + 10 + 110, 255, 45);
+		
+		
 		Point allDay = View.centerString("All Day Event?",
 				new Rectangle(topLeftX + 10 + boxWidth + width - 270, topLeftY + 10 + 110, 200, 45), editMetric);
 		g.drawString("All Day Event?", allDay.x, allDay.y);
@@ -533,6 +537,23 @@ public class View {
 			g.setFont(GUI.editItalFont);
 			dispTitle = eventTitleHint;
 
+		}else if(this.selectedField != 2 && this.selectedField != 3) {
+			
+			int i1 = Integer.parseInt(eventTime1.substring(0,2));
+			int i2 = Integer.parseInt(eventTime2.substring(0,2));
+			if(i1 == i2) {
+				int i3 = Integer.parseInt(eventTime1.substring(3));
+				int i4 = Integer.parseInt(eventTime2.substring(3));
+				if(i4 < i3) {
+					String temp= eventTime1;
+					eventTime1 = eventTime2;
+					eventTime2 = temp;
+				}
+			}else if(i2 < i1) {
+				String temp= eventTime1;
+				eventTime1 = eventTime2;
+				eventTime2 = temp;
+			}
 		}
 
 		g.setFont(GUI.editFont);
@@ -562,8 +583,6 @@ public class View {
 			}
 		}
 		
-		
-
 		Point time1 = View.centerString(eventTime1,
 				new Rectangle(topLeftX + 10, topLeftY + 10 + 110, (boxWidth + width - 290) / 2, 45), editMetric);
 		g.drawString(eventTime1, time1.x, time1.y);
@@ -571,9 +590,21 @@ public class View {
 				topLeftY + 10 + 110, (boxWidth + width - 290) / 2, 45), editMetric);
 		g.drawString(eventTime2, time2.x, time2.y);
 
-		g.setColor(Color.black);
+
+		
+		
+		g.setColor((selectedField == 2 && this.redBox ? new Color(redElement,0,0) : Color.BLACK));
+		g.drawRect(topLeftX + 10, topLeftY + 10 + 110, (boxWidth + width - 290)/2, 45);
+
+		g.setColor((selectedField == 3 && this.redBox ? new Color(redElement,0,0) : Color.BLACK));
+		g.drawRect(topLeftX + 10 + (boxWidth + width - 290)/2, topLeftY + 10 + 110, (boxWidth + width - 290)/2, 45);
+		
+		g.setColor(((selectedField == 3 || selectedField == 2)&& this.redBox ? new Color(redElement,0,0) : Color.BLACK));
 		g.drawLine(topLeftX + 10 + (boxWidth + width - 290) / 2, topLeftY + 10 + 110,
 				topLeftX + 10 + (boxWidth + width - 290) / 2, topLeftY + 10 + 155);
+
+		g.setColor(Color.black);
+		g.drawRect(topLeftX + 10 + boxWidth + width - 275, topLeftY + 10 + 110, 255, 45);
 
 		g.setFont(GUI.editFont);
 
@@ -712,6 +743,7 @@ public class View {
 		eventTime2 = "";
 		scrollBar = 0;
 		eventNotes = "";
+		selectedField = -1;
 	}
 	public String formatCalendarTime(Calendar c) {
 		return (c.get(Calendar.HOUR_OF_DAY) < 10 ? "0" : "") + c.get(Calendar.HOUR_OF_DAY) + ":" +(c.get(Calendar.MINUTE) < 10 ? "0" : "") + c.get(Calendar.MINUTE) ;
@@ -722,6 +754,7 @@ public class View {
 		isEventsShown = true;
 		eventDate = CalMathAbs.GetDayCal(gridX, gridY, GUI.instance.main.cal);
 		scrollBar = 0;
+		selectedField = -1;
 
 	}
 	public void hideEvents() {
@@ -729,6 +762,7 @@ public class View {
 		eventGridY = -1;
 		isEventsShown = false;
 		eventDate = null;
+		selectedField = -1;
 		scrollBar = 0;
 		
 	}
@@ -798,12 +832,15 @@ public class View {
 	public String eventTime1 = "10:00";
 	public String eventTime2 = "20:00";
 	public int overField = -1;
-
+	public int typingTimeLoc = -1;
+	public String prevContents = "";
 	public int eventIndex = -1; // -1 if new event, >= 0 if editing an event.
 	public boolean isEventsShown = false;
 	public boolean isEventShown = false;
 	public int eventGridX = 0;
 	public int eventGridY = 0;
+	public boolean redBox = false;
+	public long delta = 0;
 	public Calendar eventDate = CalMathAbs.ClearTime(Calendar.getInstance());
 	public CalendarEvent eventEvent = null;
 	public int scrollBar = 0;
