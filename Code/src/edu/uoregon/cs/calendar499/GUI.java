@@ -58,6 +58,7 @@ public class GUI extends JFrame{
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
 		frame = new GUIFrame(this);
+		this.setFocusTraversalKeysEnabled(false);
 		this.add(frame);
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -108,7 +109,7 @@ class GUIFrame extends JPanel implements ActionListener{
 		
 		//Month view calls day view which calls eventView
 	}
-	public long frameCount = 0L;
+	private long frameCount = 0L;
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -118,6 +119,14 @@ class GUIFrame extends JPanel implements ActionListener{
 			frameCount = 0;
 		}
 		repaint();
+	}
+
+	public long getFrameCount() {
+		return frameCount;
+	}
+
+	public void setFrameCount(long frameCount) {
+		this.frameCount = frameCount;
 	}
 }
 

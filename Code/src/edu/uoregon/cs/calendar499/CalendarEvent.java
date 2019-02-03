@@ -11,14 +11,14 @@ public class CalendarEvent {
 	
 	/*constructor for event with no title*/
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd) {
-		this(title, timeStart, timeEnd, "", "");
+		this(title, timeStart, timeEnd, "");
 	}
 	
 	
 	public CalendarEvent(String title, Calendar timeStart, Calendar timeEnd, String note) {
 		this.title = title;
-		this.timeStart = timeStart;
-		this.timeEnd = timeEnd;
+		this.timeStart = (Calendar)timeStart.clone();
+		this.timeEnd = (Calendar)timeEnd.clone();
 		this.note = note;
 	}
 

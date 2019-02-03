@@ -11,7 +11,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class UserInput implements MouseListener, WindowListener, KeyListener {
-	GUI gui;
+	private GUI gui;
+
+	public GUI getGui() {
+		return gui;
+	}
+
+	public void setGui(GUI gui) {
+		this.gui = gui;
+	}
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
@@ -34,8 +42,9 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 			if (!CalMathAbs.IsNotCalMonth(p.y, p.x, GUI.instance.main.cal)) {
 				gui.view.showEvents(p.x, p.y);
 			} else {
+
 				int dayN = CalMathAbs.GetDayN(p.y, p.x, GUI.instance.main.cal);
-				if (dayN < 15) {
+				if (dayN > 15) {
 					GUI.instance.main.cal.set(Calendar.YEAR, GUI.instance.main.cal.get(Calendar.YEAR)
 							+ (GUI.instance.main.cal.get(Calendar.MONTH) == 0 ? -1 : 0));
 					GUI.instance.main.cal.set(Calendar.MONTH, GUI.instance.main.cal.get(Calendar.MONTH)
@@ -56,13 +65,15 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				}
 			}
 		} else if (gui.view.getTitleBox(arg0.getPoint()) == -1) {
+			gui.view.hideEvent();
 			gui.view.hideEvents();
-
+			
 			GUI.instance.main.cal.set(Calendar.YEAR, GUI.instance.main.cal.get(Calendar.YEAR)
 					+ (GUI.instance.main.cal.get(Calendar.MONTH) == 0 ? -1 : 0));
 			GUI.instance.main.cal.set(Calendar.MONTH, GUI.instance.main.cal.get(Calendar.MONTH)
 					+ (GUI.instance.main.cal.get(Calendar.MONTH) == 0 ? 11 : -1));
 		} else if (gui.view.getTitleBox(arg0.getPoint()) == 1) {
+			gui.view.hideEvent();
 			gui.view.hideEvents();
 			GUI.instance.main.cal.set(Calendar.YEAR, GUI.instance.main.cal.get(Calendar.YEAR)
 					+ (GUI.instance.main.cal.get(Calendar.MONTH) == 11 ? 1 : 0));
@@ -112,49 +123,50 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				gui.view.hideEvent();
 				break;
 			case -3:
-				gui.view.selectedField = 0;
+				gui.view.setSelectedField(0);
 				break;
 			case -4:
-				gui.view.selectedField = 2;
-				gui.view.overField = 1;
+				gui.view.setSelectedField(2);
+				gui.view.setOverField(1);
 				break;
 			case -14:
-				gui.view.selectedField = 2;
-				gui.view.overField = 0;
+				gui.view.setSelectedField(2);
+				gui.view.setOverField(0);
 				break;
 			case -5:
-				gui.view.selectedField = 3;
-				gui.view.overField = 3;
+				gui.view.setSelectedField(3);
+				gui.view.setOverField(3);
 				break;
 			case -15:
-				gui.view.selectedField = 3;
-				gui.view.overField = 2;
+				gui.view.setSelectedField(3);
+				gui.view.setOverField(2);
 				break;
 			case -6:
-				gui.view.eventAllDay =!gui.view.eventAllDay;
-				gui.view.selectedField = -1;
-				gui.view.overField = -1;
+				gui.view.setEventAllDay(!gui.view.isEventAllDay());
+				gui.view.setSelectedField(-1);
+				gui.view.setOverField(-1);
 				break;
 			case -7:
-				gui.view.selectedField = 4;
+				gui.view.setSelectedField(4);
 				break;
 			case -8:
-				//Save..
-				gui.view.selectedField = 8; 
-				if(gui.view.attemptSaving()) {
+				// Save..
+				gui.view.setSelectedField(8);
+				if (gui.view.attemptSaving()) {
 					gui.view.hideEvent();
-					gui.view.selectedField = -1;
-				}else {
-					gui.view.delta = gui.frame.frameCount;
-					gui.view.redBox = true;
+					gui.view.setSelectedField(-1);
+				} else {
+					gui.view.setDelta(gui.frame.getFrameCount());
+					gui.view.setRedBox(true);
 				}
-				
+
 				break;
 			case -9:
-				if(gui.view.eventIndex != -1) {
-					//actually have to delete it.
-					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar.grab(gui.view.eventOrigDate);
-					eventsOrig.remove(gui.view.eventIndex);
+				if (gui.view.getEventIndex() != -1) {
+					// actually have to delete it.
+					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar
+							.grab(gui.view.getEventOrigDate());
+					eventsOrig.remove(gui.view.getEventIndex());
 				}
 				gui.view.hideEvent();
 				break;
@@ -192,293 +204,382 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-
 	}
 
 	@Override
 	public void windowActivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void windowClosed(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		GUI.instance.dispose();
 		GUI.instance.frame.timer.stop();
+		Main.instance.showWaitingWindow("Saving calendar");
+		/*
+		 * 
+		 * /* Handle errors....
+		 */
+		// None the less...exit*/
+		new Thread(new Runnable() {
+			public void run() {
+				FileIOStatus e = SaveEvents.saveCalendar(Main.instance.globalCalendar, Main.filePath);
+				boolean waiting = true;
+				while (waiting) {
+					Main.waitSafe(10);
+					e.lock.lock();
+					waiting = e.currentStatus.equals(Status.Waiting);
 
+					e.lock.unlock();
+				}
+				Main.waitSafe(1000);
+				Main.instance.destroyWaitingWindow();
+			}
+		}).start();
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void windowIconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void windowOpened(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
 	}
-
+	/*
+	 * Escape
+	 * Left
+	 * Right
+	 * PageUp
+	 * PageDown
+	 * 
+	 */
+	private boolean[] keysDown = new boolean[5]; 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		switch(arg0.getKeyCode()) {
+		case KeyEvent.VK_ESCAPE:
+			//Leave the 
+			keysDown[0] = true;
+			break;
+		case KeyEvent.VK_LEFT:
+			keysDown[1] = true;
+			break;
+		case KeyEvent.VK_PAGE_UP:
+			// Only allow for changing months via keypress when in the 
+			keysDown[3] = true;
+			break;
+		case KeyEvent.VK_RIGHT:
+			keysDown[2] = true;
+			break;
+		case KeyEvent.VK_PAGE_DOWN:
+			keysDown[4] = true;
+			break;
+		default:
+			Main.logDebug(3, arg0.getKeyCode());
+			break;
+		}
 	}
 
+	
+	
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 		char cc = arg0.getKeyChar();
-		if((int)cc < 32 && (int)cc != 8) {
-			//ignore?
-		}else {
-			switch(gui.view.selectedField) {
+		if ((int) cc < 32 && (int) cc != 8 && (int) cc != 9) {
+			System.out.println((int) cc);
+			// ignore?
+		} else {
+			switch (gui.view.getSelectedField()) {
 			case -1:
 				break;
 			case 0:
-				if((int)cc == 8) {
-					if(gui.view.eventTitle.length() > 0) {
-						gui.view.eventTitle = gui.view.eventTitle.substring(0, gui.view.eventTitle.length() - 1);
-					}else {
-						gui.view.delta = gui.frame.frameCount;
-						gui.view.redBox = true;
+				if((int)cc == 9) {
+					gui.view.setSelectedField(2);
+					gui.view.setOverField(0);
+				}else if ((int) cc == 8) {
+					if (gui.view.getEventTitle().length() > 0) {
+						gui.view.setEventTitle(
+								gui.view.getEventTitle().substring(0, gui.view.getEventTitle().length() - 1));
+					} else {
+						gui.view.setDelta(gui.frame.getFrameCount());
+						gui.view.setRedBox(true);
 					}
-				}else {
-					if(gui.view.eventTitle.length() < 40) {
-						gui.view.eventTitle = gui.view.eventTitle + cc;
-					}else {
-						gui.view.delta = gui.frame.frameCount;
-						gui.view.redBox = true;
+				} else {
+					if (gui.view.getEventTitle().length() < 40) {
+						gui.view.setEventTitle(gui.view.getEventTitle() + cc);
+					} else {
+						gui.view.setDelta(gui.frame.getFrameCount());
+						gui.view.setRedBox(true);
 					}
-					
+
 				}
 				break;
 			case 4:
-				if((int)cc == 8) {
-					if(gui.view.eventNotes.length() > 0) {
-						gui.view.eventNotes = gui.view.eventNotes.substring(0, gui.view.eventNotes.length() - 1);
-					}else {
-						gui.view.delta = gui.frame.frameCount;
-						gui.view.redBox = true;
+				if((int)cc == 9) {
+					gui.view.setSelectedField(-1);
+				}else if ((int) cc == 8) {
+					if (gui.view.getEventNotes().length() > 0) {
+						gui.view.setEventNotes(
+								gui.view.getEventNotes().substring(0, gui.view.getEventNotes().length() - 1));
+					} else {
+						gui.view.setDelta(gui.frame.getFrameCount());
+						gui.view.setRedBox(true);
 					}
-				}else {
-					if(gui.view.eventNotes.length() < 40) {
-						gui.view.eventNotes = gui.view.eventNotes + cc;
-					}else {
-						gui.view.delta = gui.frame.frameCount;
-						gui.view.redBox = true;
+				} else {
+					if (gui.view.getEventNotes().length() < 40) {
+						gui.view.setEventNotes(gui.view.getEventNotes() + cc);
+					} else {
+						gui.view.setDelta(gui.frame.getFrameCount());
+						gui.view.setRedBox(true);
 					}
-					
+
 				}
 				break;
 			case 2:
-				if(((int)cc >= 48 && (int)cc <= 58)  || (int)cc == 8) {
-					if(gui.view.overField == 0) {
-						if((int)cc == 8) {
-							if(gui.view.prevContents.length() > 0) {
-								gui.view.prevContents = gui.view.prevContents.substring(1);
-							}else {
-								gui.view.delta = gui.frame.frameCount;
-								gui.view.redBox = true;
-							}
-						}else {
-							if(gui.view.prevContents.length() < 2) {
-								gui.view.prevContents = gui.view.prevContents + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 23) {
-									//Coerse it
-									gui.view.prevContents = "23";
-								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime1 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime1.substring(2);
-									gui.view.prevContents = "";
-									gui.view.overField = 1;
-									return;
-								}
-							}else if(gui.view.prevContents.charAt(0) == '0'){
-								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 23) {
-									//Coerse it
-									gui.view.prevContents = "23";
-								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime1 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime1.substring(2);
-									gui.view.prevContents = "";
-									gui.view.overField = 1;
-									return;
-								}
-							}else {
-								gui.view.prevContents = "";
-								gui.view.overField = 1;
-								return;
-							}
+				if (((int) cc >= 48 && (int) cc <= 58) || (int) cc == 8 || (int) cc == 9) {
+					if ((int) cc == 9) {
+						gui.view.setPrevContents("");
+						gui.view.setOverField(gui.view.getOverField() + 1);
+						if (gui.view.getOverField() == 2) {
+							gui.view.setSelectedField(3);
 						}
-						gui.view.eventTime1 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime1.substring(2);
-					}else if(gui.view.overField == 1) {
-						if((int)cc == 8) {
-							if(gui.view.prevContents.length() > 0) {
-								gui.view.prevContents = gui.view.prevContents.substring(1);
-							}else {
-								gui.view.delta = gui.frame.frameCount;
-								gui.view.redBox = true;
-							}
-						}else {
-							if(gui.view.prevContents.length() < 2) {
-								gui.view.prevContents = gui.view.prevContents + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 59) {
-									//Coerse it
-									gui.view.prevContents = "59";
+					} else {
+						if (gui.view.getOverField() == 0) {
+							if ((int) cc == 8) {
+								if (gui.view.getPrevContents().length() > 0) {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1));
+								} else {
+									gui.view.setDelta(gui.frame.getFrameCount());
+									gui.view.setRedBox(true);
 								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime1 =  gui.view.eventTime1.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
-									gui.view.prevContents = "";
-									gui.view.overField = 2;
-									gui.view.selectedField = 3;
+							} else {
+								if (gui.view.getPrevContents().length() < 2) {
+									gui.view.setPrevContents(gui.view.getPrevContents() + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 23) {
+										// Coerse it
+										gui.view.setPrevContents("23");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime1(
+												new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ') + gui.view.getPrevContents()
+														+ gui.view.getEventTime1().substring(2));
+										gui.view.setPrevContents("");
+										gui.view.setOverField(1);
+										return;
+									}
+								} else if (gui.view.getPrevContents().charAt(0) == '0') {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1) + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 23) {
+										// Coerse it
+										gui.view.setPrevContents("23");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime1(
+												new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ') + gui.view.getPrevContents()
+														+ gui.view.getEventTime1().substring(2));
+										gui.view.setPrevContents("");
+										gui.view.setOverField(1);
+										return;
+									}
+								} else {
+									gui.view.setPrevContents("");
+									gui.view.setOverField(1);
 									return;
 								}
-							}else if(gui.view.prevContents.charAt(0) == '0'){
-								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 59) {
-									//Coerse it
-									gui.view.prevContents = "59";
+							}
+							gui.view.setEventTime1(
+									new String(new char[2 - gui.view.getPrevContents().length()]).replace('\0', ' ')
+											+ gui.view.getPrevContents() + gui.view.getEventTime1().substring(2));
+						} else if (gui.view.getOverField() == 1) {
+							if ((int) cc == 8) {
+								if (gui.view.getPrevContents().length() > 0) {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1));
+								} else {
+									gui.view.setDelta(gui.frame.getFrameCount());
+									gui.view.setRedBox(true);
 								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime1 =  gui.view.eventTime1.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
-									gui.view.prevContents = "";
-									gui.view.overField = 2;
-									gui.view.selectedField = 3;
+							} else {
+								if (gui.view.getPrevContents().length() < 2) {
+									gui.view.setPrevContents(gui.view.getPrevContents() + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 59) {
+										// Coerse it
+										gui.view.setPrevContents("59");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime1(gui.view.getEventTime1().substring(0, 3)
+												+ new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ')
+												+ gui.view.getPrevContents());
+										gui.view.setPrevContents("");
+										gui.view.setOverField(2);
+										gui.view.setSelectedField(3);
+										return;
+									}
+								} else if (gui.view.getPrevContents().charAt(0) == '0') {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1) + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 59) {
+										// Coerse it
+										gui.view.setPrevContents("59");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime1(gui.view.getEventTime1().substring(0, 3)
+												+ new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ')
+												+ gui.view.getPrevContents());
+										gui.view.setPrevContents("");
+										gui.view.setOverField(2);
+										gui.view.setSelectedField(3);
+										return;
+									}
+								} else {
+									gui.view.setPrevContents("");
+									gui.view.setOverField(2);
+									gui.view.setSelectedField(3);
 									return;
 								}
-							}else {
-								gui.view.prevContents = "";
-								gui.view.overField = 2;
-								gui.view.selectedField = 3;
-								return;
 							}
+							gui.view.setEventTime1(gui.view.getEventTime1().substring(0, 3)
+									+ new String(new char[2 - gui.view.getPrevContents().length()]).replace('\0', ' ')
+									+ gui.view.getPrevContents());
 						}
-						gui.view.eventTime1 =  gui.view.eventTime1.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+
 					}
-					
-					
-				}else {
-					gui.view.delta = gui.frame.frameCount;
-					gui.view.redBox = true;
+				} else {
+					gui.view.setDelta(gui.frame.getFrameCount());
+					gui.view.setRedBox(true);
 				}
 				break;
 			case 3:
-				if(((int)cc >= 48 && (int)cc <= 58)  || (int)cc == 8) {
-					if(gui.view.overField == 2) {
-						if((int)cc == 8) {
-							if(gui.view.prevContents.length() > 0) {
-								gui.view.prevContents = gui.view.prevContents.substring(1);
-							}else {
-								gui.view.delta = gui.frame.frameCount;
-								gui.view.redBox = true;
-							}
-						}else {
-							if(gui.view.prevContents.length() < 2) {
-								gui.view.prevContents = gui.view.prevContents + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 23) {
-									//Coerse it
-									gui.view.prevContents = "23";
-								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime2 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime2.substring(2);
-									gui.view.prevContents = "";
-									gui.view.overField = 3;
-									return;
-								}
-							}else if(gui.view.prevContents.charAt(0) == '0'){
-								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 23) {
-									//Coerse it
-									gui.view.prevContents = "23";
-								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime2 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime2.substring(2);
-									gui.view.prevContents = "";
-									gui.view.overField = 3;
-									return;
-								}
-							}else {
-								gui.view.prevContents = "";
-								gui.view.overField = 3;
-								return;
-							}
+				if (((int) cc >= 48 && (int) cc <= 58) || (int) cc == 8 || (int) cc == 9) {
+					if ((int) cc == 9) {
+						gui.view.setPrevContents("");
+						gui.view.setOverField(gui.view.getOverField() + (gui.view.getOverField() == 3 ? -4 : 1));
+						if (gui.view.getOverField() == -1) {
+							gui.view.setSelectedField(4);
 						}
-						gui.view.eventTime2 = new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents + gui.view.eventTime2.substring(2);
-					}else if(gui.view.overField == 3) {
-						if((int)cc == 8) {
-							if(gui.view.prevContents.length() > 0) {
-								gui.view.prevContents = gui.view.prevContents.substring(1);
-							}else {
-								gui.view.delta = gui.frame.frameCount;
-								gui.view.redBox = true;
-							}
-						}else {
-							if(gui.view.prevContents.length() < 2) {
-								gui.view.prevContents = gui.view.prevContents + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 59) {
-									//Coerse it
-									gui.view.prevContents = "59";
+					} else {
+						if (gui.view.getOverField() == 2) {
+							if ((int) cc == 8) {
+								if (gui.view.getPrevContents().length() > 0) {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1));
+								} else {
+									gui.view.setDelta(gui.frame.getFrameCount());
+									gui.view.setRedBox(true);
 								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime2 =  gui.view.eventTime2.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
-									gui.view.prevContents = "";
-									gui.view.overField = -1;
-									gui.view.selectedField = -1;
+							} else {
+								if (gui.view.getPrevContents().length() < 2) {
+									gui.view.setPrevContents(gui.view.getPrevContents() + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 23) {
+										// Coerse it
+										gui.view.setPrevContents("23");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime2(
+												new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ') + gui.view.getPrevContents()
+														+ gui.view.getEventTime2().substring(2));
+										gui.view.setPrevContents("");
+										gui.view.setOverField(3);
+										return;
+									}
+								} else if (gui.view.getPrevContents().charAt(0) == '0') {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1) + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 23) {
+										// Coerse it
+										gui.view.setPrevContents("23");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime2(
+												new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ') + gui.view.getPrevContents()
+														+ gui.view.getEventTime2().substring(2));
+										gui.view.setPrevContents("");
+										gui.view.setOverField(3);
+										return;
+									}
+								} else {
+									gui.view.setPrevContents("");
+									gui.view.setOverField(3);
 									return;
 								}
-							}else if(gui.view.prevContents.charAt(0) == '0'){
-								gui.view.prevContents = gui.view.prevContents.substring(1) + cc;
-								if(Integer.parseInt(gui.view.prevContents) > 59) {
-									//Coerse it
-									gui.view.prevContents = "59";
+							}
+							gui.view.setEventTime2(
+									new String(new char[2 - gui.view.getPrevContents().length()]).replace('\0', ' ')
+											+ gui.view.getPrevContents() + gui.view.getEventTime2().substring(2));
+						} else if (gui.view.getOverField() == 3) {
+							if ((int) cc == 8) {
+								if (gui.view.getPrevContents().length() > 0) {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1));
+								} else {
+									gui.view.setDelta(gui.frame.getFrameCount());
+									gui.view.setRedBox(true);
 								}
-								if(gui.view.prevContents.length() == 2) {
-									gui.view.eventTime2 =  gui.view.eventTime2.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
-									gui.view.prevContents = "";
-									gui.view.overField = -1;
-									gui.view.selectedField = -1;
+							} else {
+								if (gui.view.getPrevContents().length() < 2) {
+									gui.view.setPrevContents(gui.view.getPrevContents() + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 59) {
+										// Coerse it
+										gui.view.setPrevContents("59");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime2(gui.view.getEventTime2().substring(0, 3)
+												+ new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ')
+												+ gui.view.getPrevContents());
+										gui.view.setPrevContents("");
+										gui.view.setOverField(-1);
+										gui.view.setSelectedField(-1);
+										return;
+									}
+								} else if (gui.view.getPrevContents().charAt(0) == '0') {
+									gui.view.setPrevContents(gui.view.getPrevContents().substring(1) + cc);
+									if (Integer.parseInt(gui.view.getPrevContents()) > 59) {
+										// Coerse it
+										gui.view.setPrevContents("59");
+									}
+									if (gui.view.getPrevContents().length() == 2) {
+										gui.view.setEventTime2(gui.view.getEventTime2().substring(0, 3)
+												+ new String(new char[2 - gui.view.getPrevContents().length()])
+														.replace('\0', ' ')
+												+ gui.view.getPrevContents());
+										gui.view.setPrevContents("");
+										gui.view.setOverField(-1);
+										gui.view.setSelectedField(-1);
+										return;
+									}
+								} else {
+									gui.view.setPrevContents("");
+									gui.view.setOverField(-1);
+									gui.view.setSelectedField(-1);
 									return;
 								}
-							}else {
-								gui.view.prevContents = "";
-								gui.view.overField = -1;
-								gui.view.selectedField = -1;
-								return;
 							}
+							gui.view.setEventTime2(gui.view.getEventTime2().substring(0, 3)
+									+ new String(new char[2 - gui.view.getPrevContents().length()]).replace('\0', ' ')
+									+ gui.view.getPrevContents());
 						}
-						gui.view.eventTime2 =  gui.view.eventTime2.substring(0,3) + new String(new char[2-gui.view.prevContents.length()]).replace('\0', ' ') + gui.view.prevContents;
+
 					}
-					
-					
-				}else {
-					gui.view.delta = gui.frame.frameCount;
-					gui.view.redBox = true;
+				} else {
+					gui.view.setDelta(gui.frame.getFrameCount());
+					gui.view.setRedBox(true);
 				}
 				break;
 			}

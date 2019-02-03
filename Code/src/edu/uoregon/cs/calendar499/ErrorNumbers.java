@@ -8,6 +8,7 @@ public enum ErrorNumbers{
 	FileRead,
 	FileNotFound,
 	LoadError,
-	CustomError;	
+	CustomError,
+	SaveError;	
 }
 
