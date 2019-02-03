@@ -14,6 +14,13 @@ public class CalMathAbs {
 		return C.get(Calendar.DAY_OF_MONTH);
 	}
 	
+	// Returns a string of the passed jCalendar object where the hours and minutes are display like HH:MM, that is, they have leading zeros in both fields if they are less than 10.
+	// (e.g. 9am 5min -> 09:05, 12pm 10 min -> 12:10.)
+	public static String formatCalendarTime(Calendar c) {
+		return (c.get(Calendar.HOUR_OF_DAY) < 10 ? "0" : "") + c.get(Calendar.HOUR_OF_DAY) + ":"
+				+ (c.get(Calendar.MINUTE) < 10 ? "0" : "") + c.get(Calendar.MINUTE);
+	}
+	
 	//Checks to see if today (the user's reported date from their Date and Time from their system) is the day in i and j of the monthh copy
 	public static boolean IsCurrentDay(int i, int j, Calendar copy)
 	{
@@ -57,6 +64,7 @@ public class CalMathAbs {
 		return C;
 	}
 	
+	// This function takes a jCalendar, makes a copy, strips/sets the time components to zero, and returns the new jCalendar object. Useful for using .equals with Calendars.
 	public static Calendar ClearTime(Calendar C)
 	{
 		//making a copy of the calendar 
@@ -71,6 +79,7 @@ public class CalMathAbs {
 		return copy;
 	}
 
+	// This function will take a jCalendar object, make a copy, and set the hour, minutes and seconds on the copy and return it. Useful for CalendarEvent datastructure
 	public static Calendar setTime(Calendar c, int h, int m, int s) {
 		Calendar copy = (Calendar) c.clone();
 		copy.set(Calendar.MINUTE, m);
@@ -78,9 +87,8 @@ public class CalMathAbs {
 		copy.set(Calendar.SECOND, s);
 		return copy;
 	}
-	
+	// This function will take a jCalendar object and will create a hh:MM representation for them. (hh meaning 0-23, but no leading zero display, MM meaning 0-59, but with a leading zero displayed.)
 	public static String ToHM(Calendar c) {
-		// TODO Auto-generated method stub
 		return c.get(Calendar.HOUR_OF_DAY)+":" + (c.get(Calendar.MINUTE) < 10 ? "0"  : "") + c.get(Calendar.MINUTE);
 	}
 	

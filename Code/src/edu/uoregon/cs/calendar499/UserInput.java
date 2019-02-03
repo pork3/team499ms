@@ -165,7 +165,7 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				if (gui.view.getEventIndex() != -1) {
 					// actually have to delete it.
 					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar
-							.grab(gui.view.getEventOrigDate());
+							.grab(gui.view.getEventOrigDate(), true);
 					eventsOrig.remove(gui.view.getEventIndex());
 				}
 				gui.view.hideEvent();

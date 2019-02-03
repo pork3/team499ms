@@ -42,7 +42,7 @@ public class LoadEvents {
 			// Lock the lock to prevent race conditions
 			status.storedValue = cal;
 			status.currentStatus = Status.Success;
-			status.errorCode = ErrorNumbers.NoError;
+			status.errorCode = ErrorTypes.NoError;
 			status.lock.unlock();// Unlock the lock to allow others to access the contents and return
 		} catch (IOException e) {
 			// This is a loading error	
@@ -50,14 +50,14 @@ public class LoadEvents {
 			Main.logDebug(1,e.getMessage());
 			status.lock.lock();// Lock the lock to prevent race conditions, set errors and return
 			status.currentStatus = Status.Failed;
-			status.errorCode = ErrorNumbers.LoadError;
+			status.errorCode = ErrorTypes.LoadError;
 			status.lock.unlock(); 
 		}catch(Exception __) {
 			// This is a file not found error, hence we handle it slightly differently.
 			// We purposely leave the storedValue as empty.
 			status.lock.lock(); // But lock the file, set values and return
 			status.currentStatus = Status.Success;
-			status.errorCode = ErrorNumbers.FileNotFound;
+			status.errorCode = ErrorTypes.FileNotFound;
 			status.lock.unlock();
 		}
 		
@@ -111,7 +111,7 @@ public class LoadEvents {
 			}
 			Calendar cal = CalMathAbs.ClearTime(Calendar.getInstance()); // Create a jCalendar object that can be used to store the date of the child JSON object
 			cal.set(child.getInt("year"), child.getInt("month"), child.getInt("day")); // Set the day, month and year of the child JSON object
-			ArrayList<CalendarEvent> events = c.grab(cal); // Instantiate the events array in the Calendar (cal) object. To store the events for this day.
+			ArrayList<CalendarEvent> events = c.grab(cal, true); // Instantiate the events array in the Calendar (cal) object. To store the events for this day.
 			// Remember: java is pass by reference in that this is an object that is stored elsewhere, so editing this will change the values stored in the Calendar object.
 			
 			for(int j = 0; j < childArr.length(); j++) { // Loops over all child objects in the array

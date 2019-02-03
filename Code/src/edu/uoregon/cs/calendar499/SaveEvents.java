@@ -34,13 +34,13 @@ public class SaveEvents {
 			status.lock.lock(); // If the above succeeds, set the status and say it succeeded.
 			// Lock the lock to prevent race conditions
 			status.currentStatus = Status.Success;
-			status.errorCode = ErrorNumbers.NoError;
+			status.errorCode = ErrorTypes.NoError;
 			status.lock.unlock(); // Unlock the lock and return
 		} catch (IOException e) {
 			// Otherwise with an error, acquire the lock and set the error status and return.
 			status.lock.lock();
 			status.currentStatus = Status.Failed;
-			status.errorCode = ErrorNumbers.SaveError;
+			status.errorCode = ErrorTypes.SaveError;
 			status.lock.unlock();
 		}
 	}
@@ -52,7 +52,7 @@ public class SaveEvents {
 		Set<Calendar> days = calendar.days.keySet(); // Gets all unique dates (1/10/19 and 1/11/19 are unique but dates at different times aren't) stored in the calendar
 		JSONArray calendararray = new JSONArray(); // Creates a JSONArray object
 		for (Calendar cal : days) {
-			ArrayList<CalendarEvent> events = calendar.grab(cal); // Get the events for this particular day in the calendar
+			ArrayList<CalendarEvent> events = calendar.grab(cal, false); // Get the events for this particular day in the calendar
 			if(events.size() == 0) { //Prevent saving empty calendar days...saves on size of storage
 				continue;
 			}
