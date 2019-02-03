@@ -631,11 +631,12 @@ public class View {
 		g.setColor(Color.BLACK);
 		g.setFont(GUI.editFont);
 		
-		float redElement = 1f - ((GUI.instance.frame.getFrameCount() - this.delta) / 50f); //If displaying an error, this makes the error fade over time
+		float redElement = (this.redBox ? 1f - ((GUI.instance.frame.getFrameCount() - this.delta) / 50f) : 0); //If displaying an error, this makes the error fade over time
 		if (redElement < 0 || redElement > 1) { // If the redElement is out of range [0-1], set the redBox to false
 			this.redBox = false;
 		}
-		g.setColor((selectedField == 0 && this.redBox ? new Color(redElement, 0, 0) : Color.BLACK));
+		
+		g.setColor((selectedField == 0  || selectedField == 9 && this.redBox ? new Color(redElement, 0, 0) : Color.BLACK));
 		g.drawRect(topLeftX + 10, topLeftY + 10 + 55, boxWidth + width - 20, 45); // Draws rect for the title
 		
 		
@@ -679,6 +680,67 @@ public class View {
 
 		g.drawRect(topLeftX + 10 + boxWidth + width - 65, topLeftY + 21 + 110, 25, 25);
 
+		
+		// For the next section of if statements, they are to repair when the user inputs incomplete values and moves on (such as 9 instead of 09)
+		if (this.selectedField == 2 && this.overField == 0) {
+			// Fix the minutes field of the start time
+			if(eventTime1.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
+				eventTime1 = eventTime1.substring(0, 3) + "00";
+			}
+			int i2 = Integer.parseInt(eventTime1.substring(3).trim());
+			eventTime1 = eventTime1.substring(0, 3) + (i2 < 10 ? "0" : "") + i2;
+		} else if (this.selectedField == 2) {
+			// Fix the hours field of the start time
+			if(eventTime1.substring(0,2).trim().equals("")) { // If it is blank, replace it with 00's...
+				eventTime1 = "00" + eventTime1.substring(2);
+			}
+			int i1 = Integer.parseInt(eventTime1.substring(0, 2).trim());
+			eventTime1 = (i1 < 10 ? "0" : "") + i1 + eventTime1.substring(2);
+		} else if (this.selectedField == 3 && this.overField == 2) {
+			// Fix the minutes field of the end time
+			if(eventTime2.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
+				eventTime2 = eventTime2.substring(0, 3) + "00";
+			}
+			int i2 = Integer.parseInt(eventTime2.substring(3).trim());
+			eventTime2 = eventTime2.substring(0, 3) + (i2 < 10 ? "0" : "") + i2;
+		} else if (this.selectedField == 3) {
+			// Fix the hours field of the end time
+			if(eventTime2.substring(0,2).trim().equals("")) { // If it is blank, replace it with 00's...
+				eventTime2 = "00" + eventTime2.substring(2);
+			}
+			int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
+			eventTime2 = (i1 < 10 ? "0" : "") + i1 + eventTime2.substring(2);
+		} else{
+				if (this.selectedField != 2) {
+					// Fix the minutes and hours field of the start time
+					int i1 = Integer.parseInt(eventTime1.substring(0, 2).trim());
+					int i2 = Integer.parseInt(eventTime1.substring(3).trim());
+					if(eventTime1.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
+						eventTime1 = eventTime1.substring(0, 3) + "00";
+					}
+					if(eventTime1.substring(0,2).trim().equals("")) { // If it is blank, replace it with 00's...
+						eventTime1 = "00" + eventTime1.substring(2);
+					}
+					eventTime1 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
+				}
+				if (this.selectedField != 3) {
+					// Fix the minutes and hours field of the end time
+					if(eventTime2.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
+						eventTime2 = eventTime2.substring(0, 3) + "00";
+					}
+					if(eventTime2.substring(0,2).trim().equals("")) { // If it is blank, replace it with 00's...
+						eventTime2 = "00" + eventTime2.substring(2);
+					}
+					int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
+					int i2 = Integer.parseInt(eventTime2.substring(3).trim());
+					eventTime2 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
+				}
+			}
+		
+
+
+		
+		
 		if (eventAllDay) {
 			// Fill in the box if the user checked it
 			g.setColor(eventEditCheckBoxColor);
@@ -714,34 +776,6 @@ public class View {
 			
 		}
 		
-		// For the next section of if statements, they are to repair when the user inputs incomplete values and moves on (such as 9 instead of 09)
-		if (this.selectedField == 2 && this.overField == 0) {
-			// Fix the minutes field of the start time
-			int i2 = Integer.parseInt(eventTime1.substring(3).trim());
-			eventTime1 = eventTime1.substring(0, 3) + (i2 < 10 ? "0" : "") + i2;
-		} else if (this.selectedField == 2) {
-			// Fix the hours field of the start time
-			int i1 = Integer.parseInt(eventTime1.substring(0, 2).trim());
-			eventTime1 = (i1 < 10 ? "0" : "") + i1 + eventTime1.substring(2);
-		} else if (this.selectedField == 3 && this.overField == 2) {
-			// Fix the minutes field of the end time
-			int i2 = Integer.parseInt(eventTime2.substring(3).trim());
-			eventTime2 = eventTime2.substring(0, 3) + (i2 < 10 ? "0" : "") + i2;
-		} else if (this.selectedField == 3) {
-			// Fix the hours field of the end time
-			int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
-			eventTime2 = (i1 < 10 ? "0" : "") + i1 + eventTime2.substring(2);
-		} else if (this.selectedField != 2) {
-			// Fix the minutes and hours field of the start time
-			int i1 = Integer.parseInt(eventTime1.substring(0, 2).trim());
-			int i2 = Integer.parseInt(eventTime1.substring(3).trim());
-			eventTime1 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
-		} else if (this.selectedField != 3) {
-			// Fix the minutes and hours field of the end time
-			int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
-			int i2 = Integer.parseInt(eventTime2.substring(3).trim());
-			eventTime2 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
-		}
 		
 		
 		
