@@ -63,6 +63,7 @@ public class GUI extends JFrame{
 	// A static instance variable so that outside modules can gain access to this module (as there shouldn't ever be more than one GUI object created in the code).
 	public static GUI instance;
 	
+	
 	// The constructor requires the Main class object, the UserInput class object and a View class object
 	// This also sets up the frame so that it can accept inputs.
 	public GUI(Main main2, UserInput input, View View) {
@@ -133,6 +134,9 @@ class GUIFrame extends JPanel implements ActionListener{
 	}
 	private long frameCount = 0L; // A counter for the number of frames rendered, useful for drawing cursors that flash at a specific frequency
 	
+	private boolean isSaving = false;
+	private FileIOStatus saveStatus = null;
+	
 	// This function is called by timer every 25 ms, it will increment frameCount and force the panel to redraw it's contents
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -141,6 +145,26 @@ class GUIFrame extends JPanel implements ActionListener{
 		if(frameCount > 100000L) {
 			frameCount = 0;
 		}
+		
+		if(isSaving && saveStatus != null) {
+			//determine if it is good.
+			if(frameCount % 2 == 0) {
+				saveStatus.lock.lock();
+				isSaving = saveStatus.currentStatus.equals(Status.Waiting);
+				saveStatus.lock.unlock();
+			}
+			if(!isSaving) {
+				saveStatus = null;
+			}
+		}else if(frameCount % 40 == 0) {
+			if(Main.instance.globalCalendar.getDirty()) {
+				isSaving = true;
+				Main.instance.globalCalendar.setDirty(false);
+				Cal dc = Main.instance.globalCalendar.deepCopy();
+				saveStatus = SaveEvents.saveCalendar(dc, Main.filePath);
+			}
+		}
+		
 		repaint();
 	}
 

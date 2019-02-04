@@ -11,6 +11,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 
 import javax.swing.ImageIcon;
 ///////// VIEW MODULE \\\\\\\\\\\\\\\\\\
@@ -21,37 +22,46 @@ import javax.swing.ImageIcon;
  */
 
 public class View {
-
+	///// Private static final variables holding Strings that can be displayed to the user. 
 	private static final String[] months = { "January", "February", "March", "April", "May", "June", "July", "August",
 			"September", "October", "November", "December" };
 	private static final String[] days = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
 
+	////// Private static variables that can be changed to have the application appear differently.
+	private static final Color currentDayColor = new Color(0.9f, 0.9f, 1.0f);
+	private static final Color currentDayColor2 = new Color(0.7f, 0.7f, .7f,0.4f);
+	private static final Color titleColor = new Color(0, 0, 0);
+	private static final Color weeksColor = new Color(0, 0, 0);
+	private static final Color otherMonthColor = new Color(0.7f, 0.7f, 0.7f);
+	private static final Color currentMonthColor = new Color(1f, 1f, 1f);
+	private static final Color eventBackgroundColor = new Color(0.0f, 0.4f, 0.9f, 0.3f);
+	private static final Color eventPrevMonthBackgroundColor = new Color(0.0f, 0.45f, 1.0f, 0.4f);
+	private static final Color eventCurrentDayBackgroundColor = new Color(0.2f, 0.5f, 1.0f, 0.4f);
+	private static final Color eventEditHintColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
+	private static final Color eventEditCheckBoxColor = Color.blue;
+	private static final Color eventEditDisabledColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
+	private static final Color eventEditHighlightColor = new Color(0.1f, 0.1f, 0.1f, 0.1f);
+	private static final Point LeftArrowMonthPosition = new Point(360, 12);
+	private static final Point RightArrowMonthPosition = new Point(865, 12);
+	
+	
+	///// Private variables that store resources for images
+	private Image leftImage = new ImageIcon(this.getClass().getResource("left.png")).getImage();
+	private Image leftImage1 = new ImageIcon(this.getClass().getResource("left1.png")).getImage();
+	private Image upImage = new ImageIcon(this.getClass().getResource("up.png")).getImage();
+	private Image xImage = new ImageIcon(this.getClass().getResource("x.png")).getImage();
+	
+	
+	
+	
+	///// Private static variables that will be set during runtime
 	private static FontMetrics titleMetric;
 	private static FontMetrics bodyMetric;
 	private static FontMetrics eventMetric;
 	private static FontMetrics editMetric;
 	private static FontMetrics daysMetric;
-	private static Color currentDayColor = new Color(.95f, 0.8f, 0.8f);
-	private static Color currentDayColor2 = new Color(0.5f, 0.3f, 0.3f, 0.4f);
-	private static Color titleColor = new Color(0, 0, 0);
-	private static Color weeksColor = new Color(0, 0, 0);
-	private static Color otherMonthColor = new Color(0.7f, 0.7f, 0.7f);
-	private static Color currentMonthColor = new Color(1f, 1f, 1f);
-	private static Color eventBackgroundColor = new Color(0.0f, 0.4f, 0.9f, 0.3f);
-	private static Color eventPrevMonthBackgroundColor = new Color(0.0f, 0.45f, 1.0f, 0.4f);
-	private static Color eventCurrentDayBackgroundColor = new Color(0.2f, 0.5f, 1.0f, 0.4f);
-	private static Color eventEditHintColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
-	private static Color eventEditCheckBoxColor = Color.blue;
-	private static Color eventEditDisabledColor = new Color(0.4f, 0.4f, 0.4f, 0.6f);
-	private static Color eventEditHighlightColor = new Color(0.1f, 0.1f, 0.1f, 0.1f);
 	
-	private Image leftImage = new ImageIcon(this.getClass().getResource("left.png")).getImage();
-	private Image leftImage1 = new ImageIcon(this.getClass().getResource("left1.png")).getImage();
-	private Image upImage = new ImageIcon(this.getClass().getResource("up.png")).getImage();
-	private Image xImage = new ImageIcon(this.getClass().getResource("x.png")).getImage();
-
-	private final Point LeftArrowMonthPosition = new Point(360, 12);
-	private final Point RightArrowMonthPosition = new Point(865, 12);
+	
 	// This function handles rendering all of the elements on the screen, may call two additional helper render functions for drawing events
 	public void Display(Graphics2D g, Calendar c) {
 		// Sets the metrics to work with this graphics element passed to this function
@@ -711,31 +721,39 @@ public class View {
 			int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
 			eventTime2 = (i1 < 10 ? "0" : "") + i1 + eventTime2.substring(2);
 		} else{
-				if (this.selectedField != 2) {
-					// Fix the minutes and hours field of the start time
-					int i1 = Integer.parseInt(eventTime1.substring(0, 2).trim());
-					int i2 = Integer.parseInt(eventTime1.substring(3).trim());
-					if(eventTime1.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
-						eventTime1 = eventTime1.substring(0, 3) + "00";
-					}
-					if(eventTime1.substring(0,2).trim().equals("")) { // If it is blank, replace it with 00's...
-						eventTime1 = "00" + eventTime1.substring(2);
-					}
-					eventTime1 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
+			if (this.selectedField != 2) {
+				// Fix the minutes and hours field of the start time
+				if (eventTime1.trim().length() <= 1) {
+					eventTime1 = "00:00";
 				}
-				if (this.selectedField != 3) {
-					// Fix the minutes and hours field of the end time
-					if(eventTime2.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
-						eventTime2 = eventTime2.substring(0, 3) + "00";
-					}
-					if(eventTime2.substring(0,2).trim().equals("")) { // If it is blank, replace it with 00's...
-						eventTime2 = "00" + eventTime2.substring(2);
-					}
-					int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
-					int i2 = Integer.parseInt(eventTime2.substring(3).trim());
-					eventTime2 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
+				if (eventTime1.substring(0, 2).trim().equals("")) { // If it is blank, replace it with 00's...
+					eventTime1 = "00" + eventTime1.substring(2);
 				}
+				if (eventTime1.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
+					eventTime1 = eventTime1.substring(0, 3) + "00";
+				}
+				int i1 = Integer.parseInt(eventTime1.substring(0, 2).trim());
+				int i2 = Integer.parseInt(eventTime1.substring(3).trim());
+
+				eventTime1 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
 			}
+			if (this.selectedField != 3) {
+				// Fix the minutes and hours field of the end time
+				if (eventTime2.trim().length() <= 1) { // If it is a blank string, fix it asap. The renderer is
+														// technically on a different thread than user input
+					eventTime2 = "00:00";
+				}
+				if (eventTime2.substring(3).trim().equals("")) { // If it is blank, replace it with 00's...
+					eventTime2 = eventTime2.substring(0, 3) + "00";
+				}
+				if (eventTime2.substring(0, 2).trim().equals("")) { // If it is blank, replace it with 00's...
+					eventTime2 = "00" + eventTime2.substring(2);
+				}
+				int i1 = Integer.parseInt(eventTime2.substring(0, 2).trim());
+				int i2 = Integer.parseInt(eventTime2.substring(3).trim());
+				eventTime2 = (i1 < 10 ? "0" : "") + i1 + ":" + (i2 < 10 ? "0" : "") + i2;
+			}
+		}
 		
 
 
@@ -993,15 +1011,24 @@ public class View {
 					ee.setNote(ee.getNote());
 					ee.setTitle(cc.getTitle());
 					ee.setTimeEnd(cc.getTimeEnd());
-					ee.setTimeStart(cc.getTimeStart());
+					ee.setTimeStart(cc.getTimeStart()); // The list may now not be sorted...
 				} else {
 					// If the date is not the same, we need to delete the old one and add the new one to the new list
 					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar.grab(this.eventOrigDate, true);
-					eventsOrig.remove(this.eventIndex);
+					eventsOrig.remove(this.eventIndex); // By removing an event from a sorted list, the list is still sorted.
 					events.add(cc);
 				}
 
 			}
+			events.sort(new Comparator<CalendarEvent>() {
+				@Override
+				public int compare(CalendarEvent o1, CalendarEvent o2) {
+					return o1.getTimeStart().compareTo(o2.getTimeStart());
+				}
+			});
+			
+			// Now queue up for a save.
+			Main.instance.globalCalendar.setDirty(true);
 			// Successfully added
 			return true;
 		}

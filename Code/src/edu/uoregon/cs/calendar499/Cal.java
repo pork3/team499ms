@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 // This class object is used to store events and contains a single function useful in creating events
@@ -12,8 +13,8 @@ public class Cal {
 	// This stores a hashmap (indexed with a jCalendar (date) object) that holds lists of CalendarEvents;
 	public HashMap<Calendar, ArrayList<CalendarEvent>> days = new HashMap<Calendar, ArrayList<CalendarEvent>>();
 	 
-	
-	
+	public boolean isDirty = false;
+	private ReentrantLock lock = new ReentrantLock(); 
 	
 	
 	// This function, when provided with a jCalendar, will attempt to grab said day's events, however if the key doesn't exist in the container above, we create a new list and entry for it and return it.
@@ -28,6 +29,22 @@ public class Cal {
 		}
 		return days.get(day);
 	}
+	
+	public void setDirty(boolean val) {
+		lock.lock();
+		isDirty = val;
+		lock.unlock();
+	}
+	
+	public boolean getDirty() {
+		boolean b = false;
+		lock.lock();
+		b = isDirty;
+		lock.unlock();
+		return b;
+	}
+	
+	
 	
 	// This function will return a deep copy of this object, that can be safely used in saving without worrying about concurrent modification errors
 	// This function should be called by a thread that may be doing operations as to prevent it from making modifications while it copies. 

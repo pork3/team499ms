@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -141,6 +142,12 @@ public class LoadEvents {
 				e.setTimeEnd(ce);
 				events.add(e); // Add it to the events array
 			}
+			events.sort(new Comparator<CalendarEvent>() {
+				@Override
+				public int compare(CalendarEvent o1, CalendarEvent o2) {
+					return o1.getTimeStart().compareTo(o2.getTimeStart());
+				}
+			});
 		}
 	}
 	

@@ -130,23 +130,28 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 			case -4: // User clicked on the minutes part of the start time field, select it
 				gui.view.setSelectedField(2);
 				gui.view.setOverField(1);
+				gui.view.setPrevContents("");
 				break;
 			case -14: // User clicked on the hours part of the start time field, select it
 				gui.view.setSelectedField(2);
 				gui.view.setOverField(0);
+				gui.view.setPrevContents("");
 				break;
 			case -5: // User clicked on the minutes part of the end time field, select it
 				gui.view.setSelectedField(3);
 				gui.view.setOverField(3);
+				gui.view.setPrevContents("");
 				break;
 			case -15: // User clicked on the hours part of the end time field, select it
 				gui.view.setSelectedField(3);
 				gui.view.setOverField(2);
+				gui.view.setPrevContents("");
 				break;
 			case -6: // User clicked on the checkbox for all day event, toggle the box
 				gui.view.setEventAllDay(!gui.view.isEventAllDay());
 				gui.view.setSelectedField(-1);
 				gui.view.setOverField(-1);
+				gui.view.setPrevContents("");
 				break;
 			case -7: // User clicked on the notes field in the event editor, select it
 				gui.view.setSelectedField(4);
@@ -157,6 +162,7 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				if (gui.view.attemptSaving()) { // Success, hide the event editor and display the day view
 					gui.view.hideEvent();
 					gui.view.setSelectedField(-1);
+					gui.view.setPrevContents("");
 				} else { // Otherwise, flash the user with a red fading box to denote an error...
 					gui.view.setDelta(gui.frame.getFrameCount());
 					gui.view.setRedBox(true);
@@ -168,6 +174,12 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 					ArrayList<CalendarEvent> eventsOrig = GUI.instance.main.globalCalendar
 							.grab(gui.view.getEventOrigDate(), true); // Grab the event list
 					eventsOrig.remove(gui.view.getEventIndex()); // Remove the event from the list
+					
+					//While we don't need to sort the event list, we do need to notify the system 
+					// to save the changes.
+					Main.instance.globalCalendar.setDirty(true); // Tells the system that the calendar
+					// is dirty and to save it.
+					
 				}
 				gui.view.hideEvent(); // Hide the event, reseting variables as necessary
 				break;
@@ -309,6 +321,7 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 				}else if((int)cc == 9) { // If 9 (tab key) was pressed, select the next field
 					gui.view.setSelectedField(2);
 					gui.view.setOverField(0);
+					gui.view.setPrevContents("");
 				}else if ((int) cc == 8) { // If 8 (backspace key) was pressed, attempt to backspace.
 					if (gui.view.getEventTitle().length() > 0) { // If larger than 0, substring to remove the last character
 						gui.view.setEventTitle(
@@ -333,6 +346,7 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 					gui.view.setPrevContents("");
 					gui.view.setOverField(3); // Set the proper subfield
 					gui.view.setSelectedField(3);
+					gui.view.setPrevContents("");
 				}else if((int)cc == 9) {
 					gui.view.setSelectedField(-1);
 				}else if ((int) cc == 8) {
@@ -500,7 +514,7 @@ public class UserInput implements MouseListener, WindowListener, KeyListener {
 									// Append whitespace to any 'not filled in parts' of the string and go to the next subfield
 									gui.view.setPrevContents("");
 									gui.view.setOverField(-1);
-									gui.view.setSelectedField(-1);
+									gui.view.setSelectedField(4);
 									return;
 								}
 
