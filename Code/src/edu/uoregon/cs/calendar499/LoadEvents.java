@@ -32,13 +32,14 @@ public class LoadEvents {
 			List<String> contents = Files.readAllLines(Paths.get(fileName)); 
 			String content = String.join("\n", contents);
 			
-			
+			long timeStart = System.nanoTime();
 			Cal cal = null; // Initialize (to null) the Calendar object
 			try {
 				cal = convertFromString(content); // Try to convert the file contents to a Calendar object
 			}catch(Exception e) {
 				throw new IOException(e); // Re-throw an error to be caught in the outermost try-catch loop
 			}
+			Main.logDebug(3, "Time to load file (ns): " + (System.nanoTime() - timeStart));
 			status.lock.lock(); // If the above succeeds, set the status and storedValue and return
 			// Lock the lock to prevent race conditions
 			status.storedValue = cal;

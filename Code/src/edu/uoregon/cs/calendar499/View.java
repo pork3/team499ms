@@ -644,6 +644,7 @@ public class View {
 		float redElement = (this.redBox ? 1f - ((GUI.instance.frame.getFrameCount() - this.delta) / 50f) : 0); //If displaying an error, this makes the error fade over time
 		if (redElement < 0 || redElement > 1) { // If the redElement is out of range [0-1], set the redBox to false
 			this.redBox = false;
+			redElement = 0;
 		}
 		
 		g.setColor((selectedField == 0  || selectedField == 9 && this.redBox ? new Color(redElement, 0, 0) : Color.BLACK));
@@ -966,7 +967,7 @@ public class View {
 	
 	// Will try to save the event to the current day's list of events. Will return false if it can't be saved, true if is saved successfully.
 	public boolean attemptSaving() {
-		if (eventTitle != "") { // Only requirement (as the rest is autofilled)
+		if (eventTitle.trim() != "") { // Only requirement (as the rest is autofilled)
 			// Create a new calendar event object
 			CalendarEvent cc = new CalendarEvent("", Calendar.getInstance(), Calendar.getInstance());
 			Calendar sc = CalMathAbs.GetDayCal(eventGridY, eventGridX, this.eventDate); // Get the cell's jCalendar object
@@ -1008,7 +1009,7 @@ public class View {
 				if (eventDate.equals(eventOrigDate)) {
 					// If the date is the same, simply update the event at this position
 					CalendarEvent ee = events.get(this.eventIndex);
-					ee.setNote(ee.getNote());
+					ee.setNote(cc.getNote());
 					ee.setTitle(cc.getTitle());
 					ee.setTimeEnd(cc.getTimeEnd());
 					ee.setTimeStart(cc.getTimeStart()); // The list may now not be sorted...
@@ -1032,6 +1033,7 @@ public class View {
 			// Successfully added
 			return true;
 		}
+		eventTitle = "";
 		// It failed to save, so return false. (Only reason is that the title is empty)
 		return false;
 	}

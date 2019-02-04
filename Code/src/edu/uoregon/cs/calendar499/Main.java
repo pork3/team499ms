@@ -55,7 +55,7 @@ public class Main {
 	public static Main instance; // A variable to allow for accessing different variables without making said variables public.
 	private UserInput ui; // A variable to store the user input class object.
 	private GUI gui; // A variable to stroe the display module class object.
-	private static boolean debugging = false; // A variable for determining if the system should be printing debug statements to std. out
+	private static boolean debugging = true; // A variable for determining if the system should be printing debug statements to std. out
 	
 	//Constructor, args is the arguments passed to the 
 	public Main(String[] args) {
