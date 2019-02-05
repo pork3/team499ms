@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Stroke;
@@ -14,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -40,12 +42,12 @@ import javax.swing.Timer;
 
 public class Main {
 	
-	public static final String VERSION_NUMBER = "1.0"; // The current application version. 
+	public static final String APPLICATION_NUMBER = "1.0"; // The current application version. 
 	/*
 	 * Only change the above IFF (if and only if) you have updated the format for saving calendars.
 	 * Change the below for changes to the application and not the format for saving calendars.
 	 */
-	public static final String APPLICATION_NUMBER = "1.0.1"; // The current program version. Safe to change to reflect versions of the program.
+	public static final String VERSION_NUMBER = "1.0.1"; // The current program version. Safe to change to reflect versions of the program.
 	
 	
 	public static String filePath = "default.cal"; // The default path and file name for saving and loading calendars.
@@ -55,7 +57,11 @@ public class Main {
 	public static Main instance; // A variable to allow for accessing different variables without making said variables public.
 	private UserInput ui; // A variable to store the user input class object.
 	private GUI gui; // A variable to stroe the display module class object.
-	private static boolean debugging = true; // A variable for determining if the system should be printing debug statements to std. out
+	private static boolean debugging = false; // A variable for determining if the system should be printing debug statements to std. out
+	
+	
+	
+	
 	
 	//Constructor, args is the arguments passed to the 
 	public Main(String[] args) {
@@ -71,6 +77,7 @@ public class Main {
 		
 		FileIOStatus e = LoadEvents.loadCalendar(filePath); // Request the system to load the calendar from the specified path. Returns immediately with a promise/status object
 		boolean waiting = true; // Initialize waiting variable
+		long startTime = System.currentTimeMillis();
 		while(waiting) {
 			waitSafe(10); //Allow for some time for other threads to acquire a lock
 			e.lock.lock(); //Attempt to acquire the lock
@@ -79,7 +86,8 @@ public class Main {
 			e.lock.unlock(); // Release the lock to allow for other threads to acquire it
 		}
 		setMessage("Starting calendar"); // Set the status of the loading gui
-		waitSafe(500); // Prevents the GUI from instantly being removed, instead delay's the opening process just a bit.
+		Main.logDebug(3, "Time to load: " + (System.currentTimeMillis() - startTime));
+		waitSafe(Math.max(50, 1000 - (System.currentTimeMillis() - startTime))); // Prevents the GUI from instantly being removed, instead delay's the opening process just a bit.
 		if(e.currentStatus == Status.Failed || e.storedValue == null) { 
 			// The loading of the calendar failed, update the GUI, print to the debugger, and create a new Calendar object
 			setMessage((e.currentStatus == Status.Failed) ? "Calendar corrupted!" : "Starting calendar");
@@ -183,6 +191,8 @@ class RenderBody extends JPanel implements ActionListener {
 	public Timer timer; // A timer object that continually calls an ActionListener at set intervals
 	private static final Dimension windowSize = new Dimension(200, 300); // The frame size of the drawable portion of the loading window
 	private String message = ""; // The message to display on the loading window
+	private Image logoImage = new ImageIcon(this.getClass().getResource("logo.png")).getImage(); // Load a logo image on compile to be used when displaying the loading window
+	
 	
 	// A setter function for the message
 	public void setMessage(String msg) {
@@ -249,6 +259,22 @@ class RenderBody extends JPanel implements ActionListener {
 				g2d.fillOval(calculatePos(idx) + 150, 250, 8, 8);
 			}
 		}
+		
+		
+		g2d.drawImage(logoImage, 1,25, 1 + logoImage.getWidth(null), 25+ logoImage.getHeight(null), 0, 0,logoImage.getWidth(null), logoImage.getHeight(null),null); // Draws the team logo onto the loading window
+		
+		float vk = (float) Math.max(0, 0.25f*Math.pow(Math.cos(Math.toRadians((framecount / 1.5))),2)); // The math required to apply a "fade" to the logo, it will not fade for 'half' of the animation, then will slowly apply a fade to 75% opacity with a sin(x)^2.
+		
+		
+		g2d.setColor(new Color(1f,1f,1f,(float)vk)); // Set the color for the 'fade' layer.
+		g2d.fillRect(1, 25, logoImage.getWidth(null), logoImage.getHeight(null)); // Draw the 'fade' layer. 
+		// The above draws a transparent white box over the image (basically the background currently).
+		
+		
+		
+		
+		
+		
 	}
 
 	private int[] delta = { 1, 2, 4, 6, 9, 12, 16, 20, 25, 30, 36, 42, 50 }; //A hardcoded list of positions for the animation of the dots

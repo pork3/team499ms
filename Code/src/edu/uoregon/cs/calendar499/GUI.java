@@ -33,7 +33,7 @@ public class GUI extends JFrame{
 	
 	//////// MODIFIABLE PUBLIC STATIC FINAL VARIABLES \\\\\\\\\\
 	
-	public static final String calendarName = "Y.A.C.C - version 1.0"; // Title for the application, what is displays for the title of the GUI
+	public static final String calendarName = "Y.A.C.C - version " + Main.VERSION_NUMBER; // Title for the application, what is displays for the title of the GUI
 	public static final int boxThickness = 2; // The thickness used to draw boxes in the application 
 	public static final Color backgroundColor = new Color(255,255,242); // The background Color for the application
 	
