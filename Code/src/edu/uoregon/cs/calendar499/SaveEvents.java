@@ -75,7 +75,7 @@ public class SaveEvents {
 			child.put("events", childarray); // Add the array to the JSON object
 			calendararray.put(child); // Add this JSON object to the outer most json array
 		}
-		obj.put("version", Main.VERSION_NUMBER); // Finally put the version number and the "dates" JSON objects/arrays into the outermost JSON object
+		obj.put("version", Main.APPLICATION_NUMBER); // Finally put the version number and the "dates" JSON objects/arrays into the outermost JSON object
 		obj.put("days", calendararray);
 		return obj;
 	}
